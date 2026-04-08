@@ -230,8 +230,7 @@ services:
     security_opt:
       - seccomp:unconfined
     volumes:
-      - /mnt/calibre/config:/config
-      - /mnt/Barracuda/Media/Books:/bok
+      - /mnt/Barracuda/Media/Books:/config
     ports:
       - 8083:8080
       - 8183:8181
