@@ -1,0 +1,324 @@
+# --- Anchors ---
+x-linuxserver: &linuxserver
+  restart: unless-stopped
+  environment:
+    - PUID=1000
+    - PGID=1000
+    - TZ=${TZ}
+#
+x-host-net-privileged: &host-net-privileged
+  restart: unless-stopped
+  network_mode: host
+  privileged: true 
+#
+x-restart: &restart
+  restart: unless-stopped
+# --- Services ---
+services:
+# --- Smart Home ---
+ homeassistant:
+    <<: *host-net-privileged
+    image: ghcr.io/home-assistant/home-assistant:stable
+    container_name: homeassistant
+    environment:
+      - PUID=1000
+      - PGID=1000
+    volumes:
+      - ./homeassistant:/config
+      - /etc/localtime:/etc/localtime:ro
+      - /run/dbus:/run/dbus:ro
+#
+ mosquitto:
+    <<: *restart
+    image: eclipse-mosquitto
+    hostname: mosquitto
+    container_name: mosquitto
+    ports:
+      - "1883:1883"
+      - "9001:9001"
+    volumes:
+      - ./mosquitto:/etc/mosquitto
+      - ./mosquitto/mosquitto.conf:/mosquitto/config/mosquitto.conf
+      - ./mosquitto/data:/mosquitto/data
+      - ./mosquitto/log:/mosquitto/log
+    networks:
+      - mosquitto
+#
+ zigbee2mqtt:
+    <<: *host-net-privileged
+    container_name: zigbee2mqtt
+    image: ghcr.io/koenkk/zigbee2mqtt
+    volumes:
+        - ./z2m/data:/app/data
+        - /run/udev:/run/udev:ro
+    group_add:
+        - dialout
+    user: 1000:1000
+    environment:
+        - TZ=${TZ}
+    devices:
+        - /dev/ttyUSB0:/dev/ttyUSB0
+#
+ otbr:
+    <<: *host-net-privileged
+    container_name: otbr
+    image: ghcr.io/ownbee/hass-otbr-docker:latest
+    cap_add:
+      - SYS_ADMIN
+      - NET_ADMIN
+    environment:
+      DEVICE: "/dev/ttyUSB1"
+      BACKBONE_IF: eth0
+      FLOW_CONTROL: 1
+      FIREWALL: 1
+      NAT64: 1
+      BAUDRATE: 460800
+      OTBR_REST_PORT: 8081
+      OTBR_WEB_PORT: 7586
+      AUTOFLASH_FIRMWARE: 0
+    devices:
+      - /dev/ttyUSB1:/dev/ttyUSB1
+      - /dev/net/tun:/dev/net/tun
+    volumes:
+      - ./otbr/data:/data/thread
+#
+ matter:
+    <<: *host-net-privileged
+    image: ghcr.io/home-assistant-libs/python-matter-server:stable
+    container_name: matter
+    security_opt:
+      - apparmor:unconfined
+    volumes:
+      - ./matter/data:/data/
+      - /run/dbus:/run/dbus:ro
+      - /etc/localtime:/etc/localtime:ro
+    command: >
+      --storage-path /data
+      --paa-root-cert-dir /data/credentials
+      --bluetooth-adapter 0
+      --log-level-sdk progress
+      --primary-interface ${PRIMARY_INTERFACE}
+#
+ esphome:
+    <<: *host-net-privileged
+    container_name: esphome
+    image: ghcr.io/esphome/esphome:latest
+    volumes:
+      - ./esphome/config:/config
+      - /etc/localtime:/etc/localtime:ro
+    environment:
+      - ESPHOME_DASHBOARD_USE_PING=true
+      - USERNAME=${ESP_USER}
+      - PASSWORD=${ESP_PASSWORD}
+#
+ homebox:
+    <<: *restart
+    image: ghcr.io/sysadminsmedia/homebox:latest
+    container_name: homebox
+    environment:
+    - HBOX_LOG_LEVEL=info
+    - HBOX_LOG_FORMAT=text
+    - HBOX_WEB_MAX_FILE_UPLOAD=10
+    - HBOX_OPTIONS_ALLOW_ANALYTICS=false
+    volumes:
+      - homebox-data:/data/
+    ports:
+      - 3100:7745
+# --- ADS-B / SDR ---
+ ultrafeeder:
+    <<: *restart
+    image: ghcr.io/sdr-enthusiasts/docker-adsb-ultrafeeder
+    container_name: ultrafeeder
+    hostname: ultrafeeder
+    device_cgroup_rules:
+      - "c 189:* rwm"
+    ports:
+      - 8082:80
+    environment:
+      - LOGLEVEL=${LOGLEVEL-verbose}
+      - TZ=${TZ}
+      - READSB_DEVICE_TYPE=rtlsdr
+      - READSB_GAIN=auto
+      - READSB_RTLSDR_DEVICE=${ADSB_SDR_SERIAL}
+      - READSB_RTLSDR_PPM=${ADSB_SDR_PPM}
+      - READSB_LAT=${FEEDER_LAT}
+      - READSB_LON=${FEEDER_LONG}
+      - READSB_ALT=${FEEDER_ALT_M}m
+      - READSB_RX_LOCATION_ACCURACY=2
+      - READSB_STATS_RANGE=true
+      - ULTRAFEEDER_CONFIG=
+         adsb,feed.adsb.lol,30004,beast_reduce_plus_out,uuid=${MULTIFEEDER_UUID};
+         mlat,feed.adsb.lol,31090,uuid=${MULTIFEEDER_UUID};
+         adsb,feed.adsb.fi,30004,beast_reduce_plus_out,uuid=${MULTIFEEDER_UUID};
+         mlat,feed.adsb.fi,31090,39000,uuid=${MULTIFEEDER_UUID};
+         mlathub,piaware,30105,beast_in;
+      - UUID=${MULTIFEEDER_UUID}
+      - MLAT_USER=${FEEDER_NAME}
+      - READSB_FORWARD_MLAT_SBS=true
+      - UPDATE_TAR1090=true
+      - TAR1090_DEFAULTCENTERLAT=${FEEDER_LAT}
+      - TAR1090_DEFAULTCENTERLON=${FEEDER_LONG}
+      - TAR1090_MESSAGERATEINTITLE=true
+      - TAR1090_PAGETITLE=${FEEDER_NAME}
+      - TAR1090_PLANECOUNTINTITLE=true
+      - TAR1090_ENABLE_AC_DB=true
+      - TAR1090_FLIGHTAWARELINKS=true
+      - HEYWHATSTHAT_PANORAMA_ID=${FEEDER_HEYWHATSTHAT_ID}
+      - HEYWHATSTHAT_ALTS=${FEEDER_HEYWHATSTHAT_ALTS}
+      - TAR1090_SITESHOW=true
+      - TAR1090_RANGE_OUTLINE_COLORED_BY_ALTITUDE=true
+      - TAR1090_RANGE_OUTLINE_WIDTH=2.0
+      - TAR1090_RANGERINGSDISTANCES=50,100,150,200
+      - TAR1090_RANGERINGSCOLORS='#1A237E','#0D47A1','#42A5F5','#64B5F6'
+      - TAR1090_USEROUTEAPI=true
+      - GRAPHS1090_DARKMODE=true
+      - INFLUXDBV2_URL=${INFLUX_URL}
+      - INFLUXDBV2_TOKEN=${INFLUX_TOKEN}
+      - INFLUXDBV2_BUCKET=${INFLUX_BUCKET}
+    volumes:
+      - /opt/adsb/ultrafeeder/globe_history:/var/globe_history
+      - /opt/adsb/ultrafeeder/graphs1090:/var/lib/collectd
+      - /proc/diskstats:/proc/diskstats:ro
+      - /dev/bus/usb:/dev/bus/usb
+    tmpfs:
+      - /run:exec,size=256M
+      - /tmp:size=128M
+      - /var/log:size=32M
+#
+ piaware:
+    <<: *restart
+    image: ghcr.io/sdr-enthusiasts/docker-piaware:latest
+    container_name: piaware
+    ports:
+      - 8086:8080
+    environment:
+      - BEASTHOST=ultrafeeder
+      - TZ=${TZ}
+      - FEEDER_ID=${PIAWARE_FEEDER_ID}
+    tmpfs:
+      - /run:exec,size=64M
+      - /var/log
+#
+ overheadADSB:
+    <<: *restart
+    container_name: overheadADSB
+    command: python main.py
+    build:
+      context: ./overheadADSB
+      dockerfile: Dockerfile
+    volumes:
+      - ./overheadADSB:/data
+    ports:
+      - 8003:8003
+      - 8004:8004
+# --- Media ---
+ jellyfin:
+    <<: *linuxserver
+    image: lscr.io/linuxserver/jellyfin:latest
+    container_name: jellyfin
+    volumes:
+      - ./jellyfin:/config
+      - /mnt/Barracuda/Media/Series:/data/tvshows
+      - /mnt/Barracuda/Media/Movies:/data/movies
+    ports:
+      - 8096:8096
+#
+ calibre:
+    <<: *linuxserver
+    image: lscr.io/linuxserver/calibre:latest
+    container_name: calibre
+    security_opt:
+      - seccomp:unconfined
+    volumes:
+      - /mnt/calibre/config:/config
+      - /mnt/Barracuda/Media/Books:/bok
+    ports:
+      - 8083:8080
+      - 8183:8181
+      - 8084:8081
+      - 9090:9090
+#
+ paperless:
+    <<: *restart
+    container_name: paperless
+    image: ghcr.io/paperless-ngx/paperless-ngx:latest
+    depends_on:
+      - redis
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./paperless/data:/usr/src/paperless/data
+      - ./paperless/media:/usr/src/paperless/media
+      - ./paperless/export:/usr/src/paperless/export
+      - ./paperless/consume:/usr/src/paperless/consume
+    environment:
+      PAPERLESS_REDIS: redis://redis:6379
+      PAPERLESS_URL: https://paperless.${DOMAIN}
+      PAPERLESS_ALLOWED_HOSTS: paperless.${DOMAIN}
+      PAPERLESS_CSRF_TRUSTED_ORIGINS: https://paperless.${DOMAIN}
+# --- Networking & Infrastructure ---
+ nginx:
+    <<: *restart
+    container_name: nginx
+    image: 'jc21/nginx-proxy-manager:latest'
+    ports:
+      - '80:80'
+      - '81:81'
+      - '443:443'
+    networks:
+      nginx:
+        ipv4_address: 172.10.0.13
+    volumes:
+      - ./nginx/data:/data
+      - ./letsencrypt:/etc/letsencrypt
+#
+ syncthing:
+    <<: *linuxserver
+    image: lscr.io/linuxserver/syncthing:latest
+    container_name: syncthing
+    hostname: ${HOST}
+    volumes:
+      - ./syncthing/config:/config
+      - /mnt/calibre/config/calibreout:/config/calibreout
+      - /mnt/calibre/config/calibrein:/config/calibrein
+      - /mnt/Barracuda/Media:/config/Media
+    ports:
+      - 8384:8384
+      - 22000:22000/tcp
+      - 22000:22000/udp
+      - 21027:21027/udp
+#
+ redis:
+    <<: *restart
+    container_name: redis
+    image: docker.io/library/redis:8
+    volumes:
+      - redisdata:/data
+#
+ homepage:
+    <<: *restart
+    image: ghcr.io/gethomepage/homepage:latest
+    container_name: homepage
+    environment:
+      HOMEPAGE_ALLOWED_HOSTS: ${IP}:3000,${DOMAIN},172.18.0.3:3000
+    ports:
+      - 3000:3000
+    volumes:
+      - ./homepage/config:/app/config
+      - ./homepage/docker.sock:/var/run/docker.sock:ro
+      - /mnt/Barracuda:/barracuda:ro
+# --- Volumes & Networks ---
+volumes:
+    homebox-data:
+        driver: local
+    redisdata:
+#
+networks:
+    mosquitto:
+        name: mosquitto
+        driver: bridge
+    nginx:
+      driver: bridge
+      ipam:
+        config:
+          - subnet: 172.10.0.0/24
