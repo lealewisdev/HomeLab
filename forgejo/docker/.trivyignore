@@ -1,0 +1,10 @@
+# .trivyignore
+# Vendored docker/docker in buildx/compose go.mod, awaiting upstream bump.
+CVE-2026-34040
+CVE-2026-84304
+CVE-2026-79921
+CVE-2026-84445
+CVE-2026-86145
+CVE-2026-89161
+CVE-2026-11822
+CVE-2026-11824

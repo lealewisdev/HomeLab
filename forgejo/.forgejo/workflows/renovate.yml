@@ -1,0 +1,41 @@
+name: Renovate
+on:
+  schedule:
+    - cron: "0 4 * * *"
+      timezone: Europe/London
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  renovate:
+    runs-on: docker
+    container: renovate/renovate:44.52@sha256:778ff1b404d79ef7763f0c904ebb279a4138ffc1017181ad076b1648e37f6dbd
+    timeout-minutes: 30
+    steps:
+      - name: Checkout
+        uses: https://github.com/actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Run Renovate
+        env:
+          RENOVATE_TOKEN: ${{ secrets.RENOVATE_TOKEN }}
+          RENOVATE_PLATFORM: 'forgejo'
+          RENOVATE_ENDPOINT: https://${{ vars.REGISTRY }}/api/v1
+          RENOVATE_GITHUB_COM_TOKEN: ${{ secrets.GH_TOKEN }}
+          RENOVATE_GIT_AUTHOR: 'Renovate Bot <${{ vars.RENOVATE_BOT_EMAIL }}>'
+          RENOVATE_AUTODISCOVER: 'true'
+          RENOVATE_TIMEZONE: 'Europe/London'
+        run: renovate
+
+      - name: Notify n8n
+        if: '!cancelled()'
+        continue-on-error: true
+        run: |
+          set -eo pipefail
+          curl \
+            --fail-with-body \
+            --show-error \
+            --silent \
+            -X POST \
+            -H "Content-Type: application/json" \
+            -d "{\"repository\":\"${{ github.repository }}\",\"workflow\":\"${{ github.workflow }}\",\"image_tag\":\"${{ steps.tags.outputs.sha }}\",\"semver\":\"${{ steps.version.outputs.full }}\",\"status\":\"${{ job.status }}\",\"triggered_by\":\"${{ github.event_name }}\",\"run_url\":\"${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}\"}" \
+            "${{ secrets.N8N_WEBHOOK_URL }}"

@@ -1,0 +1,218 @@
+name: Build, Scan, Push Runner Image
+on:
+  workflow_call:
+    inputs:
+      dockerfile-context:
+        required: true
+        type: string
+      image-tag-var:
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+env:
+  REGISTRY: ${{ vars.REGISTRY }}
+  IMAGE: ${{ vars.REGISTRY }}/${{ github.repository }}
+
+jobs:
+  build:
+    runs-on: docker
+    timeout-minutes: 30
+    steps:
+      - name: Checkout
+        uses: https://github.com/actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+
+      - name: Read Version
+        id: version
+        run: |
+          VERSION_FILE="${{ inputs.dockerfile-context }}/VERSION"
+          if [ ! -f "$VERSION_FILE" ]; then
+            echo "Missing $VERSION_FILE" >&2
+            exit 1
+          fi
+          VERSION=$(tr -d '[:space:]' < "$VERSION_FILE")
+          if ! [[ "$VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            echo "VERSION must be plain semver (e.g. 1.4.0), got: $VERSION" >&2
+            exit 1
+          fi
+          echo "full=$VERSION" >> "$GITHUB_OUTPUT"
+          echo "major_minor=${VERSION%.*}" >> "$GITHUB_OUTPUT"
+          echo "major=${VERSION%%.*}" >> "$GITHUB_OUTPUT"
+
+      - name: Guard Version Bump
+        if: github.event_name == 'push'
+        run: |
+          BEFORE="${{ github.event.before }}"
+          if [ -z "$BEFORE" ] || [ "$BEFORE" = "0000000000000000000000000000000000000000" ] || ! git cat-file -e "$BEFORE" 2>/dev/null; then
+            echo "No previous ref position to diff against, skipping guard."
+            exit 0
+          fi
+          # Diff against the ref's position before this push (not just
+          # HEAD~1), so a multi-commit push or merge is checked in full
+          # regardless of merge/rebase strategy.
+          DOCKERFILE_CHANGED=$(git diff --name-only "$BEFORE" HEAD -- "${{ inputs.dockerfile-context }}/Dockerfile")
+          VERSION_CHANGED=$(git diff --name-only "$BEFORE" HEAD -- "${{ inputs.dockerfile-context }}/VERSION")
+          if [ -n "$DOCKERFILE_CHANGED" ] && [ -z "$VERSION_CHANGED" ]; then
+            echo "Dockerfile in ${{ inputs.dockerfile-context }} changed but VERSION wasn't bumped." >&2
+            echo "Bump ${{ inputs.dockerfile-context }}/VERSION before merging." >&2
+            exit 1
+          fi
+
+      - name: Set Image Tags
+        id: tags
+        run: |
+          BASE="${IMAGE}:${{ inputs.image-tag-var }}"
+          SHA="$(git rev-parse --short HEAD)"
+          REF_NAME="${{ github.ref_name }}"
+
+          # Adjust "main" below if your default branch is named differently.
+          if [ "$REF_NAME" = "main" ]; then
+            # Semver tags are cut on every run - including the weekly/dispatch
+            # freshness rebuilds - so consumers pinned to a semver tag still
+            # receive OS-level security patches, not just "-latest"/"-sha".
+            TAGS="${BASE}-latest,${BASE}-${SHA},${BASE}-${{ steps.version.outputs.full }},${BASE}-${{ steps.version.outputs.major_minor }},${BASE}-${{ steps.version.outputs.major }}"
+            PRIMARY="${BASE}-${SHA}"
+          else
+            # Manual/branch runs get their own tag namespace instead of
+            # overwriting the "latest"/semver tags that main owns.
+            BRANCH_SLUG=$(printf '%s' "$REF_NAME" \
+              | tr '[:upper:]' '[:lower:]' \
+              | tr -c 'a-z0-9._-' '-' \
+              | sed -E 's/^[-.]+//' \
+              | cut -c1-100)
+            TAGS="${BASE}-${BRANCH_SLUG},${BASE}-${BRANCH_SLUG}-${SHA}"
+            PRIMARY="${BASE}-${BRANCH_SLUG}-${SHA}"
+          fi
+
+          echo "list=$TAGS" >> "$GITHUB_OUTPUT"
+          # this tag always exists on every run, so it's what we scan/push/sign against
+          echo "primary=$PRIMARY" >> "$GITHUB_OUTPUT"
+          echo "sha=$SHA" >> "$GITHUB_OUTPUT"
+
+      - name: Log In To Registry
+        run: |
+          echo "${{ secrets.REGISTRY_TOKEN }}" | docker login "$REGISTRY" \
+            -u "${{ secrets.REGISTRY_USER }}" --password-stdin
+
+      - name: Log In To dhi.io
+        run: |
+          echo "${{ secrets.DHI_TOKEN }}" | docker login dhi.io \
+            -u "${{ secrets.DHI_USER }}" --password-stdin
+
+      - name: Build Image
+        id: build
+        run: |
+          docker buildx inspect forgejo-builder >/dev/null 2>&1 || \
+            docker buildx create --name forgejo-builder --use
+          IFS=',' read -ra TAG_LIST <<< "${{ steps.tags.outputs.list }}"
+          TAG_ARGS=()
+          for t in "${TAG_LIST[@]}"; do
+            TAG_ARGS+=(--tag "$t")
+          done
+          docker buildx build \
+            --pull \
+            --platform linux/amd64 \
+            "${TAG_ARGS[@]}" \
+            --cache-from "type=registry,ref=${IMAGE}:${{ inputs.image-tag-var }}-cache" \
+            --cache-to "type=registry,ref=${IMAGE}:${{ inputs.image-tag-var }}-cache,mode=max" \
+            --metadata-file metadata.json \
+            --load \
+            "${{ inputs.dockerfile-context }}"
+          DIGEST=$(jq -r '."containerimage.digest" // empty' metadata.json)
+          if [ -z "$DIGEST" ]; then
+            echo "Could not determine built image digest from buildx metadata" >&2
+            exit 1
+          fi
+          # NOTE: this digest reflects what buildx built, not necessarily what
+          # ends up in the registry (see Push Image step below) - kept here
+          # for debugging/log purposes only, signing uses the post-push digest.
+          echo "digest=$DIGEST" >> "$GITHUB_OUTPUT"
+
+      - name: Log Out Of dhi.io
+        if: always()
+        run: docker logout dhi.io
+
+      - name: Get Trivy DB Cache Key Date
+        id: trivy-date
+        run: echo "date=$(date -u +'%Y-%m-%d')" >> "$GITHUB_OUTPUT"
+
+      - name: Cache Trivy DB
+        uses: https://github.com/actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: ~/.cache/trivy
+          key: trivy-db-${{ runner.os }}-${{ steps.trivy-date.outputs.date }}
+          restore-keys: |
+            trivy-db-${{ runner.os }}-
+
+      - name: Generate SBOM
+        run: |
+          trivy image \
+            --cache-dir ~/.cache/trivy \
+            --format cyclonedx \
+            --output sbom.cdx.json \
+            "${{ steps.tags.outputs.primary }}"
+
+      - name: Scan Image
+        run: |
+          trivy sbom \
+            --cache-dir ~/.cache/trivy \
+            --exit-code 1 \
+            --ignore-unfixed \
+            --severity CRITICAL,HIGH \
+            --ignorefile "${{ inputs.dockerfile-context }}/.trivyignore" \
+            sbom.cdx.json
+
+      - name: Push Image
+        id: push
+        run: |
+          IFS=',' read -ra TAG_LIST <<< "${{ steps.tags.outputs.list }}"
+          for t in "${TAG_LIST[@]}"; do
+            docker push "$t"
+          done
+          # `docker buildx build --load` can hand the image to the local
+          # Docker daemon in a re-encoded manifest format, so the digest
+          # buildx recorded pre-load doesn't always match what actually lands
+          # in the registry on push. Read the digest back from the pushed
+          # image itself so cosign signs what's really there, instead of
+          # trusting steps.build.outputs.digest.
+          DIGEST=$(docker inspect --format='{{range .RepoDigests}}{{println .}}{{end}}' "${{ steps.tags.outputs.primary }}" \
+            | grep -F "${IMAGE}@" | head -n1 | cut -d'@' -f2)
+          if [ -z "$DIGEST" ]; then
+            echo "Could not resolve pushed digest for ${IMAGE}" >&2
+            exit 1
+          fi
+          echo "digest=$DIGEST" >> "$GITHUB_OUTPUT"
+
+      - name: Sign And Attest Image
+        env:
+          COSIGN_KEY: ${{ secrets.COSIGN_KEY }}
+          COSIGN_PASSWORD: ${{ secrets.COSIGN_PASSWORD }}
+        run: |
+          IMAGE_REF="${IMAGE}@${{ steps.push.outputs.digest }}"
+          cosign sign --key env://COSIGN_KEY --yes "$IMAGE_REF"
+          cosign attest --key env://COSIGN_KEY --yes \
+            --predicate sbom.cdx.json \
+            --type cyclonedx \
+            "$IMAGE_REF"
+
+      - name: Log Out Of Registry
+        if: always()
+        run: docker logout "$REGISTRY"
+
+      - name: Notify n8n
+        if: '!cancelled()'
+        continue-on-error: true
+        run: |
+          set -eo pipefail
+          curl \
+            --fail-with-body \
+            --show-error \
+            --silent \
+            -X POST \
+            -H "Content-Type: application/json" \
+            -d "{\"repository\":\"${{ github.repository }}\",\"workflow\":\"${{ github.workflow }}\",\"image_tag\":\"${{ steps.tags.outputs.sha }}\",\"semver\":\"${{ steps.version.outputs.full }}\",\"status\":\"${{ job.status }}\",\"triggered_by\":\"${{ github.event_name }}\",\"run_url\":\"${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}\"}" \
+            "${{ secrets.N8N_WEBHOOK_URL }}"

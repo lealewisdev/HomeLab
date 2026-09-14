@@ -1,0 +1,23 @@
+name: Docker Runner
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'docker/Dockerfile'
+      - 'docker/VERSION'
+      - 'docker/.trivyignore'
+      - '.forgejo/workflows/docker-runner.yml'
+      - '.forgejo/workflows/_build-scan-push.yml'
+  workflow_dispatch:
+concurrency:
+  group: build-docker-runner-${{ github.ref }}-${{ github.event_name }}
+  cancel-in-progress: false
+permissions:
+  contents: read
+jobs:
+  docker-image:
+    uses: ./.forgejo/workflows/_build-scan-push.yml
+    with:
+      dockerfile-context: docker
+      image-tag-var: ${{ vars.DOCKER_RUNNER }}
+    secrets: inherit
