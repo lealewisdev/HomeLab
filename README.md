@@ -47,8 +47,8 @@ Infrastucture as code for a NixOS based server hosting 70+ services in one Docke
 
 ## TODO
 - Secondary OpenBSD server for hosting websites
-- Hardening Postgres user priviledges
+- Hardening PostgreSQL user privileges
 - Convert primary servers primary drive to ZFS + ZFS snapshots
-- Create and host new service to replace Canon Selphy app
+- Create and host new service to replace 'Canon Selphy' app
 
 **Skills demonstrated:** infrastructure as code · CI/CD and supply-chain security · container orchestration · network segmentation · secrets management · observability · Linux system administration
