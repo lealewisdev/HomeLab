@@ -37,13 +37,13 @@ Infrastucture as code for a NixOS based server hosting 70+ services in one Docke
 - **Snapshot of a live system.** Files are copied from the running host, so paths differ from the layout here. For example, `configuration.nix` lives in `/etc/nixos` and each custom image sits in its own build context beside `compose.yaml`. Secrets, environment files and machine-specific configuration are omitted.
 
 ## Screenshots
-![n8n Forgejo action status pipeline](.assets/images/jorgejo-action-status.png "n8n pipeline called across multiple repositories")
+![n8n Forgejo action status pipeline](.assets/images/forgejo-action-status.png "n8n pipeline called across multiple repositories")
 
 ![n8n Docker image deployment pipeline](.assets/images/docker-image-deployment.png "n8n pipeline called primarily by my [ADSB telemetry API project](https://github.com/lealewisdev/OverheadADS-B)")
 
 ![Glance Dashboard](.assets/images/glance-dashboard.png "Dashboard for quick status overview and acessing services")
 
-![Grafana Dashboard](.assets/images/grafana-dashboard.png "Dashboard for detailed status overview of Server (exluding service uptime, HTTP probe duration and router traffic by device))
+![Grafana Dashboard](.assets/images/grafana-dashboard.png "Dashboard for detailed status overview of Server (exluding service uptime, HTTP probe duration and router traffic by device)")
 
 ## TODO
 - Secondary OpenBSD server for hosting websites
