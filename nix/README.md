@@ -36,12 +36,6 @@ Flake-based, fully declarative configuration for the single host that runs the h
 | Access and secrets | `admin` (wheel, docker) and an unprivileged `guest`, with password SSH login disabled and home directories mode `700`. sops-nix is configured with an example secret, and [sops](https://github.com/getsops/sops) is installed for editing. |
 | User environment | [fish](https://github.com/fish-shell/fish-shell), [Starship](https://github.com/starship/starship), [zoxide](https://github.com/ajeetdsouza/zoxide), [fzf](https://github.com/junegunn/fzf), [tmux](https://github.com/tmux/tmux), [uv](https://github.com/astral-sh/uv) and [Atuin](https://github.com/atuinsh/atuin) with a self-hosted history server. Stylix applies Catppuccin Frappé to explicitly enabled targets only. |
 
-## Usage
-
-```bash
-sudo nixos-rebuild switch --flake .#server
-```
-
 ## Design decisions
 
 - **Reproducible overrides.** Anything patched or fetched from outside nixpkgs, such as the BlueZ patch, is pinned by hash.
