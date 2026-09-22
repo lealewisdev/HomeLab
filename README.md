@@ -46,6 +46,7 @@ Infrastucture as code for a NixOS based server hosting 70+ services in one Docke
 ![Grafana Dashboard](.assets/images/grafana-dashboard.png "Dashboard for detailed status overview of Server (exluding service uptime, HTTP probe duration and router traffic by device)")
 
 ## TODO
+- Finish D2 diagrams
 - Secondary OpenBSD server for hosting websites
 - Hardening PostgreSQL user privileges
 - Convert primary servers primary drive to ZFS + ZFS snapshots
