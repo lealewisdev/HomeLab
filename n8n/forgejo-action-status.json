@@ -1,0 +1,231 @@
+{
+  "name": "Forgejo Action Status",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "forgejo-action",
+        "authentication": "headerAuth",
+        "options": {}
+      },
+      "id": "77cf49c4-dd27-4e7e-bde6-5e09248abe53",
+      "name": "Forgejo Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        -320,
+        400
+      ],
+      "webhookId": "REDACTED_WEBHOOK_ID",
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "REDACTED_CRED_ID_1",
+          "name": "X-Webhook-Token"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "b4e69712-d1ba-4273-9811-1abcbc3fc37a",
+              "name": "repository",
+              "value": "={{ $json.body.repository }}",
+              "type": "string"
+            },
+            {
+              "id": "bb02ca10-7a91-4953-b839-25e860c975fa",
+              "name": "workflow",
+              "value": "={{ $json.body.workflow }}",
+              "type": "string"
+            },
+            {
+              "id": "e9f3495e-103e-4d57-af29-46f140903ede",
+              "name": "run_url",
+              "value": "={{ $json.body.run_url }}",
+              "type": "string"
+            },
+            {
+              "id": "1",
+              "name": "status",
+              "type": "string",
+              "value": "={{ $json.body.status }}"
+            },
+            {
+              "id": "6f402dd2-efd0-4123-a52f-5419b48a4f89",
+              "name": "apprise_url",
+              "value": "={{ $json.body.apprise_url }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "37df5fb5-4e08-4121-82e8-e8cef10d0c40",
+      "name": "Extract Vars",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -144,
+        400
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "c1",
+              "leftValue": "={{ $json.status }}",
+              "rightValue": "success",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "f27c9ce0-55e9-4734-879b-f7a86577263d",
+      "name": "Success?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        32,
+        400
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $('Extract Vars').item.json.apprise_url }}",
+        "sendBody": true,
+        "contentType": "form-urlencoded",
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "body",
+              "value": "=Workflow \"{{ $json.workflow }}\" success in \"{{ $json.repository }}\": \"{{ $json.run_url }}\"."
+            },
+            {
+              "name": "type",
+              "value": "success"
+            },
+            {
+              "name": "title",
+              "value": "Forgejo Action Success"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "bcb7e88a-5c7d-451c-b74a-57b84429855f",
+      "name": "Action Success Notification",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        208,
+        304
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $('Extract Vars').item.json.apprise_url }}",
+        "sendBody": true,
+        "contentType": "form-urlencoded",
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "body",
+              "value": "=Workflow \"{{ $json.workflow }}\" failure in \"{{ $json.repository }}\": \"{{ $json.run_url }}\"."
+            },
+            {
+              "name": "type",
+              "value": "failure"
+            },
+            {
+              "name": "title",
+              "value": "Forgejo Action Failure"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "ce2f75b8-f327-4a6f-a034-eac9696eb003",
+      "name": "Action Failure Notification",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        208,
+        496
+      ]
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Forgejo Webhook": {
+      "main": [
+        [
+          {
+            "node": "Extract Vars",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract Vars": {
+      "main": [
+        [
+          {
+            "node": "Success?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Success?": {
+      "main": [
+        [
+          {
+            "node": "Action Success Notification",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Action Failure Notification",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "REDACTED_VERSION_ID",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "REDACTED_INSTANCE_ID"
+  },
+  "nodeGroups": [],
+  "id": "REDACTED_WORKFLOW_ID",
+  "tags": []
+}

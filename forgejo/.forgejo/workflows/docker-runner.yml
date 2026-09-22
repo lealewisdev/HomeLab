@@ -5,17 +5,17 @@ on:
     paths:
       - 'docker/Dockerfile'
       - 'docker/VERSION'
+      - 'docker/.trivyignore'
       - '.forgejo/workflows/docker-runner.yml'
       - '.forgejo/workflows/_build-scan-push.yml'
-  schedule:
-    - cron: '00 8 * * 1'
-      timezone: Europe/London
   workflow_dispatch:
 concurrency:
-  group: build-docker-runner-${{ github.ref }}
+  group: build-docker-runner-${{ github.ref }}-${{ github.event_name }}
   cancel-in-progress: false
+permissions:
+  contents: read
 jobs:
-  build:
+  docker-image:
     uses: ./.forgejo/workflows/_build-scan-push.yml
     with:
       dockerfile-context: docker

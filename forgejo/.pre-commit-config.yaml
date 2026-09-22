@@ -1,6 +1,6 @@
 repos:
   - repo: https://github.com/hadolint/hadolint
-    rev: v2.12.0
+    rev: v2.15.1
     hooks:
       - id: hadolint-docker
 
@@ -8,3 +8,9 @@ repos:
     rev: v3.97.1
     hooks:
       - id: trufflehog
+
+  - repo: https://github.com/renovatebot/pre-commit-hooks
+    rev: 44.103.6 # can't match with renovate container
+    hooks:
+      - id: renovate-config-validator
+        files: ^renovate\.json$

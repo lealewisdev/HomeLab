@@ -1,0 +1,629 @@
+{
+  "name": "Docker Image Deployment",
+  "nodes": [
+    {
+      "parameters": {
+        "url": "={{ $('Extract Vars').item.json.semaphore_url }}/{{ $('Extract Vars').item.json.semaphore_project_id }}/tasks/{{ $('Semaphore Rollback Webhook').item.json.id }}",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpBearerAuth",
+        "options": {}
+      },
+      "id": "11276eab-e4af-4414-b25b-0155c43e6a37",
+      "name": "Get Rollback Status",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -128,
+        560
+      ],
+      "credentials": {
+        "httpBearerAuth": {
+          "id": "redacted",
+          "name": "Bearer Auth account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "rc2",
+              "leftValue": "={{ $json.status }}",
+              "rightValue": "success",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "2f99d660-3795-40dc-869a-d7b47f954f31",
+      "name": "Rollback Healthy?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        224,
+        544
+      ]
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "forgejo-deploy",
+        "options": {}
+      },
+      "id": "e0cc9b25-cbff-4206-94f3-690ea8103db5",
+      "name": "Forgejo Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        -1712,
+        384
+      ],
+      "webhookId": "redacted"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "1",
+              "name": "repository",
+              "type": "string",
+              "value": "={{ $json.body.repository }}"
+            },
+            {
+              "id": "2",
+              "name": "image_tag",
+              "type": "string",
+              "value": "={{ $json.body.image_tag }}"
+            },
+            {
+              "id": "3",
+              "name": "semaphore_project_id",
+              "type": "number",
+              "value": "={{ $json.body.semaphore_project_id }}"
+            },
+            {
+              "id": "4",
+              "name": "semaphore_deploy_template_id",
+              "type": "number",
+              "value": "={{ $json.body.semaphore_deploy_template_id }}"
+            },
+            {
+              "id": "5",
+              "name": "semaphore_rollback_template_id",
+              "type": "number",
+              "value": "={{ $json.body.semaphore_rollback_template_id }}"
+            },
+            {
+              "id": "28188f27-8251-4bcd-bcf1-9255fa1f4863",
+              "name": "semaphore_url",
+              "value": "={{ $json.body.semaphore_url}}",
+              "type": "string"
+            },
+            {
+              "id": "5c9d3a11-76b0-47f5-83f1-552420f1ef60",
+              "name": "apprise_url",
+              "value": "={{ $json.body.apprise_url}}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "c39674b1-de6d-4995-8f3d-e599078596fe",
+      "name": "Extract Vars",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -1536,
+        384
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $('Extract Vars').item.json.semaphore_url }}/{{ $('Extract Vars').item.json.semaphore_project_id }}/tasks",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpBearerAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ { \"template_id\": $json.semaphore_deploy_template_id, \"environment\": JSON.stringify({ image_tag: $json.image_tag }) } }}",
+        "options": {}
+      },
+      "id": "4eb70404-ef30-4e22-adf1-cd655d98c45d",
+      "name": "Semaphore Deploy Webhook",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -1360,
+        384
+      ],
+      "credentials": {
+        "httpBearerAuth": {
+          "id": "redacted",
+          "name": "Bearer Auth account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "url": "={{ $('Extract Vars').item.json.semaphore_url }}/{{ $('Extract Vars').item.json.semaphore_project_id }}/tasks/{{ $('Semaphore Deploy Webhook').item.json.id }}",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpBearerAuth",
+        "options": {}
+      },
+      "id": "11a165da-68bb-4cd0-956c-72c1007b7c30",
+      "name": "Get Deployment Status",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -1008,
+        384
+      ],
+      "credentials": {
+        "httpBearerAuth": {
+          "id": "redacted",
+          "name": "Bearer Auth account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "c1",
+              "leftValue": "={{ $json.status }}",
+              "rightValue": "running",
+              "operator": {
+                "type": "string",
+                "operation": "notContains"
+              }
+            },
+            {
+              "id": "4fb69a7a-e570-47e6-9166-3fbf34e1d79a",
+              "leftValue": "={{ $json.status }}",
+              "rightValue": "waiting",
+              "operator": {
+                "type": "string",
+                "operation": "notContains"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "48830fb2-94ba-47b2-a06a-876753d0c000",
+      "name": "Deployed?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        -832,
+        384
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $('Extract Vars').item.json.semaphore_url }}/{{ $('Extract Vars').item.json.semaphore_project_id }}/tasks",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpBearerAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ { \"template_id\": $('Extract Vars').item.json.semaphore_rollback_template_id, \"environment\": JSON.stringify({ image_tag: $('Extract Vars').item.json.image_tag, reason: \"health check failed\" }) } }}",
+        "options": {}
+      },
+      "id": "4ab0a027-fa1e-4dc0-bff4-16879cc916db",
+      "name": "Semaphore Rollback Webhook",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -480,
+        560
+      ],
+      "credentials": {
+        "httpBearerAuth": {
+          "id": "redacted",
+          "name": "Bearer Auth account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "amount": 15
+      },
+      "id": "927349d1-b9d8-4a47-9f64-6eeeae4af196",
+      "name": "Await Rollback",
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        -304,
+        560
+      ],
+      "webhookId": "4f32ade7-b79b-4721-8c79-0512bd1cac40"
+    },
+    {
+      "parameters": {
+        "amount": 15
+      },
+      "id": "f1798a2d-fa23-462b-b10f-559f0c3d9bfd",
+      "name": "Await Deploy",
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        -1184,
+        384
+      ],
+      "webhookId": "4a668858-443a-4acc-a7c5-62dc11d2dcf4"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "rc1",
+              "leftValue": "={{ $json.status }}",
+              "rightValue": "running",
+              "operator": {
+                "type": "string",
+                "operation": "notContains"
+              }
+            },
+            {
+              "id": "6a3f2f0b-9e1a-4c9d-8f6b-2b7e0d5c9a11",
+              "leftValue": "={{ $json.status }}",
+              "rightValue": "waiting",
+              "operator": {
+                "type": "string",
+                "operation": "notContains"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "df22eafb-e24e-4d4c-af8f-c0400c38c5dd",
+      "name": "Rolled Back?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        48,
+        560
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "c1",
+              "leftValue": "={{ $json.status }}",
+              "rightValue": "success",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "54affe49-b869-4f05-b6bf-85bd168f58bd",
+      "name": "Deployment Healthy?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        -656,
+        368
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $('Extract Vars').item.json.apprise_url }}",
+        "sendBody": true,
+        "contentType": "form-urlencoded",
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "body",
+              "value": "={{ $('Extract Vars').item.json.repository }} deployment failed and was automatically rolled back to the previous image (attempted image_tag: {{ $('Extract Vars').item.json.image_tag }})"
+            },
+            {
+              "name": "type",
+              "value": "warning"
+            },
+            {
+              "name": "title",
+              "value": "={{ $('Extract Vars').item.json.repository }} — Deploy Failed, Rolled Back"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "120934b6-047a-42b9-b121-618f901408ca",
+      "name": "Rollback Success Notification",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        400,
+        448
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $('Extract Vars').item.json.apprise_url }}",
+        "sendBody": true,
+        "contentType": "form-urlencoded",
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "body",
+              "value": "={{ $('Extract Vars').item.json.repository }} deployment failed AND the automatic rollback also failed (attempted image_tag: {{ $('Extract Vars').item.json.image_tag }}) — manual intervention required immediately"
+            },
+            {
+              "name": "type",
+              "value": "failure"
+            },
+            {
+              "name": "title",
+              "value": "={{ $('Extract Vars').item.json.repository }} — ROLLBACK FAILED"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "15b2b60e-17b6-42d0-af81-8d65065ff367",
+      "name": "Rollback Failure Notification",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        400,
+        640
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $('Extract Vars').item.json.apprise_url }}",
+        "sendBody": true,
+        "contentType": "form-urlencoded",
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "body",
+              "value": "={{ $('Extract Vars').item.json.repository }} deployment succeeded (image_tag: {{ $('Extract Vars').item.json.image_tag }})"
+            },
+            {
+              "name": "type",
+              "value": "success"
+            },
+            {
+              "name": "title",
+              "value": "={{ $('Extract Vars').item.json.repository }} — Deploy Success"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "4c62f7ab-9f8b-465d-bb57-ccb69957032b",
+      "name": "Deployment Success Notification",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -480,
+        272
+      ]
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Get Rollback Status": {
+      "main": [
+        [
+          {
+            "node": "Rolled Back?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Rollback Healthy?": {
+      "main": [
+        [
+          {
+            "node": "Rollback Success Notification",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Rollback Failure Notification",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Forgejo Webhook": {
+      "main": [
+        [
+          {
+            "node": "Extract Vars",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract Vars": {
+      "main": [
+        [
+          {
+            "node": "Semaphore Deploy Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Semaphore Deploy Webhook": {
+      "main": [
+        [
+          {
+            "node": "Await Deploy",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Deployment Status": {
+      "main": [
+        [
+          {
+            "node": "Deployed?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Deployed?": {
+      "main": [
+        [
+          {
+            "node": "Deployment Healthy?",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Await Deploy",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Semaphore Rollback Webhook": {
+      "main": [
+        [
+          {
+            "node": "Await Rollback",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Await Rollback": {
+      "main": [
+        [
+          {
+            "node": "Get Rollback Status",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Await Deploy": {
+      "main": [
+        [
+          {
+            "node": "Get Deployment Status",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Rolled Back?": {
+      "main": [
+        [
+          {
+            "node": "Rollback Healthy?",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Await Rollback",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Deployment Healthy?": {
+      "main": [
+        [
+          {
+            "node": "Deployment Success Notification",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Semaphore Rollback Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "26172615-4a08-4010-872b-d11b0a7b9eab",
+  "meta": {
+    "instanceId": "redacted"
+  },
+  "nodeGroups": [],
+  "id": "K7grOph9ocQToVbA",
+  "tags": []
+}

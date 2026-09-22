@@ -1,0 +1,18 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "extends": ["customManagers:dockerfileVersions"],
+  "packageRules": [
+    {
+      "matchManagers": ["dockerfile", "custom.regex"],
+      "matchFileNames": ["docker/Dockerfile"],
+      "bumpVersions": [
+        {
+          "name": "Bump docker/VERSION on Dockerfile update",
+          "filePatterns": ["docker/VERSION"],
+          "matchStrings": ["^(?<version>.+)$"],
+          "bumpType": "patch"
+        }
+      ]
+    }
+  ]
+}

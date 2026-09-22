@@ -1,5 +1,5 @@
 # syntax=docker/dockerfile:1
-FROM dhi.io/docker:29-cli-dev@sha256:3d0924938c1f8c73e4ab1d44f2b151c254365b95a71082e46dc3abb49a234cbd
+FROM dhi.io/docker:29-cli-dev@sha256:d5570a4bab6149d3dfcb34705458ff908dd56159db24ac7804c9403b819c381c
 
 # renovate: datasource=deb depName=bash versioning=deb registryUrl=https://dhi.io/deb/debian?suite=trixie&components=main&binaryArch=amd64
 ARG BASH_PKG_VERSION=5.2.37-2+dhi1
@@ -40,13 +40,13 @@ RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
     && rm -f /usr/local/libexec/docker/cli-plugins/docker-scout \
     && rm -f /usr/local/libexec/docker/cli-plugins/docker-compose
 
-COPY --from=dhi.io/trivy:0-compat@sha256:f83fae336fd804120279fef4f05d661f47ac1e86c06f477b169fd1d383bc455f \
+COPY --from=dhi.io/trivy:0-compat@sha256:79df1739288c1550178258939737439fda6132270b768d63a3ddeee291aeae47 \
     /usr/bin/trivy /usr/local/bin/trivy
 
-COPY --from=dhi.io/cosign:3@sha256:f6ddafbcae5d3a4af6c73a58491a7f2af9b41a0dcabc5712cad0efde944260f6 \
+COPY --from=dhi.io/cosign:3@sha256:081f0b0c107251081787f4e5e3e090cc975351f92994990119dbc990aa08442f \
     /usr/bin/cosign /usr/local/bin/cosign
 
-COPY --from=dhi.io/trufflehog:3@sha256:d0bc1f26dbb988bf4b61e6ad48a64fcbbb87499273740df3132fde3b805db00e \
+COPY --from=dhi.io/trufflehog:3@sha256:a4be6b49a65b680590f442b0ff41693804c6f5bce6aea003b874b046cfafcc52 \
     /usr/bin/trufflehog /usr/local/bin/trufflehog
 
 COPY --from=hadolint/hadolint:v2.15.1-debian@sha256:9a3944b7fddcb947d1ffd90829ac1a6e5c30479223358f249d8b96c7d0019e27 \

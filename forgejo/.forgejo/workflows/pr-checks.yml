@@ -1,23 +1,80 @@
-name: Docker Runner
+name: PR Checks
 on:
-  push:
+  pull_request:
     branches: [main]
-    paths:
-      - 'docker/Dockerfile'
-      - 'docker/VERSION'
-      - 'docker/.trivyignore'
-      - '.forgejo/workflows/docker-runner.yml'
-      - '.forgejo/workflows/_build-scan-push.yml'
-  workflow_dispatch:
-concurrency:
-  group: build-docker-runner-${{ github.ref }}-${{ github.event_name }}
-  cancel-in-progress: false
+
 permissions:
   contents: read
+
 jobs:
-  docker-image:
-    uses: ./.forgejo/workflows/_build-scan-push.yml
-    with:
-      dockerfile-context: docker
-      image-tag-var: ${{ vars.DOCKER_RUNNER }}
-    secrets: inherit
+  renovate-config:
+    runs-on: docker
+    container: renovate/renovate:44.52@sha256:778ff1b404d79ef7763f0c904ebb279a4138ffc1017181ad076b1648e37f6dbd
+    timeout-minutes: 5
+    steps:
+      - name: Checkout
+        uses: https://github.com/actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - name: Validate Renovate config
+        run: renovate-config-validator --strict
+
+  hadolint:
+    runs-on: docker
+    timeout-minutes: 10
+    steps:
+      - name: Checkout
+        uses: https://github.com/actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Lint Dockerfiles
+        run: |
+          STATUS=0
+          while IFS= read -r -d '' file; do
+            echo "::group::$file"
+            hadolint "$file" || STATUS=1
+            echo "::endgroup::"
+          done < <(find . -type f \( -name 'Dockerfile' -o -name 'Dockerfile.*' \) -print0)
+          exit $STATUS
+
+  trufflehog:
+    runs-on: docker
+    timeout-minutes: 10
+    steps:
+      - name: Checkout
+        uses: https://github.com/actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+
+      - name: Scan For Secrets
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+        run: |
+          trufflehog git file://. \
+            --since-commit "$BASE_SHA" \
+            --only-verified \
+            --fail
+
+  version-bump-guard:
+    runs-on: docker
+    timeout-minutes: 5
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - dockerfile-context: docker
+    steps:
+      - name: Checkout
+        uses: https://github.com/actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+
+      - name: Guard Version Bump
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          CONTEXT: ${{ matrix.dockerfile-context }}
+        run: |
+          DOCKERFILE_CHANGED=$(git diff --name-only "$BASE_SHA" HEAD -- "${CONTEXT}/Dockerfile")
+          VERSION_CHANGED=$(git diff --name-only "$BASE_SHA" HEAD -- "${CONTEXT}/VERSION")
+          if [ -n "$DOCKERFILE_CHANGED" ] && [ -z "$VERSION_CHANGED" ]; then
+            echo "${CONTEXT}/Dockerfile changed but ${CONTEXT}/VERSION wasn't bumped." >&2
+            echo "Bump ${CONTEXT}/VERSION before merging." >&2
+            exit 1
+          fi

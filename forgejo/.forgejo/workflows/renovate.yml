@@ -21,14 +21,29 @@ jobs:
           RENOVATE_PLATFORM: 'forgejo'
           RENOVATE_ENDPOINT: https://${{ vars.REGISTRY }}/api/v1
           RENOVATE_GITHUB_COM_TOKEN: ${{ secrets.GH_TOKEN }}
-          RENOVATE_GIT_AUTHOR: 'Renovate Bot <${{ vars.RENOVATE_BOT_EMAIL }}>'
+          RENOVATE_GIT_AUTHOR: 'Renovate Bot <${{ secrets.RENOVATE_BOT_EMAIL }}>'
           RENOVATE_AUTODISCOVER: 'true'
           RENOVATE_TIMEZONE: 'Europe/London'
+          RENOVATE_DETECT_HOST_RULES_FROM_ENV: 'true'
+          RENOVATE_DOCKER_DHI_IO_USERNAME: ${{ secrets.DHI_USER }}
+          RENOVATE_DOCKER_DHI_IO_PASSWORD: ${{ secrets.DHI_TOKEN }}
+          RENOVATE_DEB_DHI_IO_USERNAME: ${{ secrets.DHI_USER }}
+          RENOVATE_DEB_DHI_IO_PASSWORD: ${{ secrets.DHI_TOKEN }}
+          RENOVATE_DRY_RUN: lookup
+          LOG_LEVEL: debug
         run: renovate
 
       - name: Notify n8n
         if: '!cancelled()'
         continue-on-error: true
+        env:
+          N8N_WEBHOOK_URL: ${{ secrets.N8N_WEBHOOK_URL }}
+          N8N_WEBHOOK_TOKEN: ${{ secrets.N8N_WEBHOOK_TOKEN }}
+          APPRISE_URL: ${{ secrets.APPRISE_URL }}
+          REPOSITORY: ${{ github.repository }}
+          WORKFLOW: ${{ github.workflow }}
+          JOB_STATUS: ${{ job.status }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
         run: |
           set -eo pipefail
           curl \
@@ -37,5 +52,6 @@ jobs:
             --silent \
             -X POST \
             -H "Content-Type: application/json" \
-            -d "{\"repository\":\"${{ github.repository }}\",\"workflow\":\"${{ github.workflow }}\",\"image_tag\":\"${{ steps.tags.outputs.sha }}\",\"semver\":\"${{ steps.version.outputs.full }}\",\"status\":\"${{ job.status }}\",\"triggered_by\":\"${{ github.event_name }}\",\"run_url\":\"${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}\"}" \
-            "${{ secrets.N8N_WEBHOOK_URL }}"
+            -H "X-Webhook-Token: ${N8N_WEBHOOK_TOKEN}" \
+            -d "{\"repository\":\"${REPOSITORY}\",\"workflow\":\"${WORKFLOW}\",\"run_url\":\"${RUN_URL}\",\"status\":\"${JOB_STATUS}\",\"apprise_url\":\"${APPRISE_URL}\"}" \
+            "$N8N_WEBHOOK_URL"
