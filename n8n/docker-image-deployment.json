@@ -6,7 +6,9 @@
         "url": "={{ $('Extract Vars').item.json.semaphore_url }}/{{ $('Extract Vars').item.json.semaphore_project_id }}/tasks/{{ $('Semaphore Rollback Webhook').item.json.id }}",
         "authentication": "genericCredentialType",
         "genericAuthType": "httpBearerAuth",
-        "options": {}
+        "options": {
+          "timeout": 10000
+        }
       },
       "id": "11276eab-e4af-4414-b25b-0155c43e6a37",
       "name": "Get Rollback Status",
@@ -16,9 +18,11 @@
         -128,
         560
       ],
+      "retryOnFail": true,
+      "waitBetweenTries": 2000,
       "credentials": {
         "httpBearerAuth": {
-          "id": "redacted",
+          "id": "REDACTED_CRED_ID_2",
           "name": "Bearer Auth account"
         }
       }
@@ -60,6 +64,7 @@
       "parameters": {
         "httpMethod": "POST",
         "path": "forgejo-deploy",
+        "authentication": "headerAuth",
         "options": {}
       },
       "id": "e0cc9b25-cbff-4206-94f3-690ea8103db5",
@@ -70,7 +75,13 @@
         -1712,
         384
       ],
-      "webhookId": "redacted"
+      "webhookId": "REDACTED_WEBHOOK_ID",
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "REDACTED_CRED_ID_1",
+          "name": "X-Webhook-Token"
+        }
+      }
     },
     {
       "parameters": {
@@ -83,10 +94,46 @@
               "value": "={{ $json.body.repository }}"
             },
             {
+              "id": "4597ba42-91c2-476c-8a9d-2aa738bbf4bd",
+              "name": "triggered_by",
+              "value": "={{ $json.body.triggered_by }}",
+              "type": "string"
+            },
+            {
+              "id": "dace01cc-2a22-42d2-9f91-19ba5f06dc90",
+              "name": "workflow",
+              "value": "={{ $json.body.workflow }}",
+              "type": "string"
+            },
+            {
+              "id": "57301c34-d7ff-44f1-8dd3-1849cab6489a",
+              "name": "run_url",
+              "value": "={{ $json.body.run_url }}",
+              "type": "string"
+            },
+            {
+              "id": "51fb0fcf-343b-4e55-9f15-528d893cb9e1",
+              "name": "status",
+              "value": "={{ $json.body.status }}",
+              "type": "string"
+            },
+            {
               "id": "2",
               "name": "image_tag",
               "type": "string",
               "value": "={{ $json.body.image_tag }}"
+            },
+            {
+              "id": "e4cbde29-50fe-4fce-bd6f-311b71af5d14",
+              "name": "semver",
+              "value": "={{ $json.body.semver }}",
+              "type": "string"
+            },
+            {
+              "id": "28188f27-8251-4bcd-bcf1-9255fa1f4863",
+              "name": "semaphore_url",
+              "value": "={{ $json.body.semaphore_url }}",
+              "type": "string"
             },
             {
               "id": "3",
@@ -107,15 +154,9 @@
               "value": "={{ $json.body.semaphore_rollback_template_id }}"
             },
             {
-              "id": "28188f27-8251-4bcd-bcf1-9255fa1f4863",
-              "name": "semaphore_url",
-              "value": "={{ $json.body.semaphore_url}}",
-              "type": "string"
-            },
-            {
               "id": "5c9d3a11-76b0-47f5-83f1-552420f1ef60",
               "name": "apprise_url",
-              "value": "={{ $json.body.apprise_url}}",
+              "value": "={{ $json.body.apprise_url }}",
               "type": "string"
             }
           ]
@@ -152,7 +193,7 @@
       ],
       "credentials": {
         "httpBearerAuth": {
-          "id": "redacted",
+          "id": "REDACTED_CRED_ID_2",
           "name": "Bearer Auth account"
         }
       }
@@ -162,7 +203,9 @@
         "url": "={{ $('Extract Vars').item.json.semaphore_url }}/{{ $('Extract Vars').item.json.semaphore_project_id }}/tasks/{{ $('Semaphore Deploy Webhook').item.json.id }}",
         "authentication": "genericCredentialType",
         "genericAuthType": "httpBearerAuth",
-        "options": {}
+        "options": {
+          "timeout": 10000
+        }
       },
       "id": "11a165da-68bb-4cd0-956c-72c1007b7c30",
       "name": "Get Deployment Status",
@@ -172,9 +215,11 @@
         -1008,
         384
       ],
+      "retryOnFail": true,
+      "waitBetweenTries": 2000,
       "credentials": {
         "httpBearerAuth": {
-          "id": "redacted",
+          "id": "REDACTED_CRED_ID_2",
           "name": "Bearer Auth account"
         }
       }
@@ -192,23 +237,41 @@
             {
               "id": "c1",
               "leftValue": "={{ $json.status }}",
-              "rightValue": "running",
+              "rightValue": "success",
               "operator": {
                 "type": "string",
-                "operation": "notContains"
+                "operation": "contains"
               }
             },
             {
               "id": "4fb69a7a-e570-47e6-9166-3fbf34e1d79a",
               "leftValue": "={{ $json.status }}",
-              "rightValue": "waiting",
+              "rightValue": "error",
               "operator": {
                 "type": "string",
-                "operation": "notContains"
+                "operation": "contains"
+              }
+            },
+            {
+              "id": "8eb6bcc0-c9fe-4ba6-b812-f8b811afd3c9",
+              "leftValue": "={{ $json.status }}",
+              "rightValue": "stopped",
+              "operator": {
+                "type": "string",
+                "operation": "contains"
+              }
+            },
+            {
+              "id": "98ac5731-0ed6-4cc9-8095-be7cf51625f4",
+              "leftValue": "={{ $runIndex }}",
+              "rightValue": 40,
+              "operator": {
+                "type": "number",
+                "operation": "gte"
               }
             }
           ],
-          "combinator": "and"
+          "combinator": "or"
         },
         "options": {}
       },
@@ -219,7 +282,8 @@
       "position": [
         -832,
         384
-      ]
+      ],
+      "retryOnFail": false
     },
     {
       "parameters": {
@@ -242,7 +306,7 @@
       ],
       "credentials": {
         "httpBearerAuth": {
-          "id": "redacted",
+          "id": "REDACTED_CRED_ID_2",
           "name": "Bearer Auth account"
         }
       }
@@ -288,23 +352,41 @@
             {
               "id": "rc1",
               "leftValue": "={{ $json.status }}",
-              "rightValue": "running",
+              "rightValue": "success",
               "operator": {
                 "type": "string",
-                "operation": "notContains"
+                "operation": "contains"
               }
             },
             {
               "id": "6a3f2f0b-9e1a-4c9d-8f6b-2b7e0d5c9a11",
               "leftValue": "={{ $json.status }}",
-              "rightValue": "waiting",
+              "rightValue": "error",
               "operator": {
                 "type": "string",
-                "operation": "notContains"
+                "operation": "contains"
+              }
+            },
+            {
+              "id": "c7b60965-4873-45dc-8fb3-d95eb94d1e31",
+              "leftValue": "={{ $json.status }}",
+              "rightValue": "stopped",
+              "operator": {
+                "type": "string",
+                "operation": "contains"
+              }
+            },
+            {
+              "id": "0186288d-7f5a-423b-90e4-ac3b9b63dc78",
+              "leftValue": "={{ $runIndex }}",
+              "rightValue": 40,
+              "operator": {
+                "type": "number",
+                "operation": "gte"
               }
             }
           ],
-          "combinator": "and"
+          "combinator": "or"
         },
         "options": {}
       },
@@ -315,7 +397,8 @@
       "position": [
         48,
         560
-      ]
+      ],
+      "retryOnFail": false
     },
     {
       "parameters": {
@@ -368,7 +451,7 @@
             },
             {
               "name": "title",
-              "value": "={{ $('Extract Vars').item.json.repository }} — Deploy Failed, Rolled Back"
+              "value": "={{ $('Extract Vars').item.json.repository }} — Rollback Success"
             }
           ]
         },
@@ -401,7 +484,7 @@
             },
             {
               "name": "title",
-              "value": "={{ $('Extract Vars').item.json.repository }} — ROLLBACK FAILED"
+              "value": "={{ $('Extract Vars').item.json.repository }} — ROLLBACK FAILURE"
             }
           ]
         },
@@ -434,7 +517,7 @@
             },
             {
               "name": "title",
-              "value": "={{ $('Extract Vars').item.json.repository }} — Deploy Success"
+              "value": "={{ $('Extract Vars').item.json.repository }} — Deployment Success"
             }
           ]
         },
@@ -619,11 +702,12 @@
     "binaryMode": "separate",
     "availableInMCP": false
   },
-  "versionId": "26172615-4a08-4010-872b-d11b0a7b9eab",
+  "versionId": "REDACTED_VERSION_ID",
   "meta": {
-    "instanceId": "redacted"
+    "templateCredsSetupCompleted": true,
+    "instanceId": "REDACTED_INSTANCE_ID"
   },
   "nodeGroups": [],
-  "id": "K7grOph9ocQToVbA",
+  "id": "REDACTED_WORKFLOW_ID",
   "tags": []
 }
