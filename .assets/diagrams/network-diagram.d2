@@ -1,0 +1,714 @@
+vars: {
+  d2-config: {
+    theme-id: 200
+    theme-overrides: {
+      N1: "#C6D0F5"  # Text
+      N2: "#B5BFE2"  # Subtext1
+      N3: "#A5ADCE"  # Subtext0
+      N4: "#626880"  # Surface2
+      N5: "#51576D"  # Surface1
+      N6: "#414559"  # Surface0
+      N7: "#303446"  # Base
+
+      B1: "#CA9EE6"  # Mauve
+      B2: "#CA9EE6"  # Mauve
+      B3: "#737994"  # Overlay0
+      B4: "#626880"  # Surface2
+      B5: "#51576D"  # Surface1
+      B6: "#414559"  # Surface0
+
+      AA2: "#E78284"  # Red
+      AA4: "#51576D"  # Surface1
+      AA5: "#414559"  # Surface0
+
+      AB4: "#51576D"  # Surface1
+      AB5: "#414559"  # Surface0
+    }
+  }
+  frappe: {
+    _text: "#C6D0F5"
+    rosewater: "#F2D5CF"
+    flamingo:  "#EEBEBE"
+    pink:      "#F4B8E4"
+    mauve:     "#CA9EE6"
+    red:       "#E78284"
+    maroon:    "#EA999C"
+    peach:     "#EF9F76"
+    yellow:    "#E5C890"
+    green:     "#A6D189"
+    teal:      "#81C8BE"
+    sky:       "#99D1DB"
+    sapphire:  "#85C1DC"
+    blue:      "#8CAAEE"
+    lavender:  "#BABBF1"
+  }
+}
+
+classes: {
+  rosewater: {
+    style: {
+      font-color: ${frappe.rosewater}
+      stroke: ${frappe.rosewater}
+    }
+  }
+  flamingo: {
+    style: {
+      font-color: ${frappe.flamingo}
+      stroke: ${frappe.flamingo}
+    }
+  }
+  pink: {
+    style: {
+      font-color: ${frappe.pink}
+      stroke: ${frappe.pink}
+    }
+  }
+  mauve: {
+    style: {
+      font-color: ${frappe.mauve}
+      stroke: ${frappe.mauve}
+    }
+  }
+  red: {
+    style: {
+      font-color: ${frappe.red}
+      stroke: ${frappe.red}
+    }
+  }
+  maroon: {
+    style: {
+      font-color: ${frappe.maroon}
+      stroke: ${frappe.maroon}
+    }
+  }
+  peach: {
+    style: {
+      font-color: ${frappe.peach}
+      stroke: ${frappe.peach}
+    }
+  }
+  yellow: {
+    style: {
+      font-color: ${frappe.yellow}
+      stroke: ${frappe.yellow}
+    }
+  }
+  green: {
+    style: {
+      font-color: ${frappe.green}
+      stroke: ${frappe.green}
+    }
+  }
+  teal: {
+    style: {
+      font-color: ${frappe.teal}
+      stroke: ${frappe.teal}
+    }
+  }
+  sky: {
+    style: {
+      font-color: ${frappe.sky}
+      stroke: ${frappe.sky}
+    }
+  }
+  sapphire: {
+    style: {
+      font-color: ${frappe.sapphire}
+      stroke: ${frappe.sapphire}
+    }
+  }
+  blue: {
+    style: {
+      font-color: ${frappe.blue}
+      stroke: ${frappe.blue}
+    }
+  }
+  lavender: {
+    style: {
+      font-color: ${frappe.lavender}
+      stroke: ${frappe.lavender}
+    }
+  }
+  invisible: {
+    style.opacity: 0
+    label: a
+  }
+}
+(*** -> ***)[*]: {
+  style.border-radius: 999
+}
+
+internet: Internet {
+  shape: cloud
+}
+router: {}
+internet -> router
+nixos.**: {
+  &leaf: true
+  width: 350
+  height: 50
+  style.stroke-width: 0
+}
+nixos: {
+  label: NixOs
+  style: {
+    font-size: 35
+    bold: true
+  }
+  shape: rectangle
+  grid-rows: 2
+  grid-columns: 1
+  vertical-gap: 0
+  horizontal-gap: 25
+  traefik_net: {
+    label: ""
+    grid-rows: 2
+    grid-columns: 1
+    vertical-gap: 25
+    horizontal-gap: 0
+    style: {
+      font-size: 25
+      bold: true
+    }
+
+    header_row: {
+      label: ""
+      grid-rows: 1
+      grid-columns: 3
+      horizontal-gap: 0
+      vertical-gap: 0
+      height: 100
+      style: {
+        fill: transparent
+        stroke-width: 0
+      }
+
+      lefty: {
+        width: 2075
+        height: 100
+        style.opacity: 0
+      }
+
+      this_icon: {
+        label: "Networks: [traefik/traefik]"
+        label.near: center-center
+        icon: https://cdn.jsdelivr.net/gh/selfhst/icons@main/svg/traefik-light.svg
+        icon.near: center-left
+        width: 500
+        height: 100
+        style: {
+          fill: transparent
+          font-size: 25
+          bold: true
+        }
+      }
+
+      right: {
+        width: 2075
+        style.opacity: 0
+      }
+    }
+
+    body: {
+      label: ""
+      grid-rows: 1
+      grid-columns: 6
+      vertical-gap: 0
+      horizontal-gap: 25
+      style: {
+        fill: transparent
+        stroke-width: 0
+      }
+      observability: Observability {
+        style: {
+          font-size: 25
+          bold: true
+        }
+        grid-rows: 7
+        grid-columns: 1
+        horizontal-gap: 25
+        vertical-gap: 25
+        victorialogs: "victoriametrics/victoria-logs" {
+          icon.near: center-left
+          label.near: center-center
+          icon: https://cdn.jsdelivr.net/gh/selfhst/icons@main/svg/victoriametrics-light.svg
+        }
+        victoriametrics: "victoriametrics/victoria-metrics" {
+          icon.near: center-left
+          label.near: center-center
+          icon: https://cdn.jsdelivr.net/gh/selfhst/icons@main/svg/victoriametrics-light.svg
+        }
+        grafana: "grafana/grafana-enterprise" {
+          icon.near: center-left
+          label.near: center-center
+          icon: https://cdn.jsdelivr.net/gh/selfhst/icons@main/svg/grafana-light.svg
+        }
+        glance: "glanceapp/glance" {
+          icon.near: center-left
+          label.near: center-center
+          icon: https://cdn.jsdelivr.net/gh/selfhst/icons@main/svg/glance-light.svg
+        }
+        cloudbeaver: "dbeaver/cloudbeaver" {
+          icon.near: center-left
+          label.near: center-center
+          icon: https://cdn.jsdelivr.net/gh/selfhst/icons@main/svg/cloudbeaver-light.svg
+        }
+        alloy: "grafana/alloy" {
+          icon.near: center-left
+          label.near: center-center
+          icon: https://cdn.jsdelivr.net/gh/selfhst/icons@main/svg/grafana-alloy-light.svg
+        }
+        cadvisor: "google/cadvisor" {
+          icon.near: center-left
+          label.near: center-center
+          icon: https://cdn.jsdelivr.net/gh/selfhst/icons@main/svg/cadvisor-light.svg
+        }
+      }
+      DevOps: DevOps {
+        style: {
+          font-size: 25
+          bold: true
+        }
+        grid-rows: 7
+        grid-columns: 2
+        vertical-gap: 25
+        horizontal-gap: 25
+        git: "forgejo/forgejo" {
+          class: sky
+          icon.near: center-left
+          label.near: center-center
+          icon: https://cdn.jsdelivr.net/gh/selfhst/icons@main/svg/forgejo-light.svg
+        }
+        git_runner: "forgejo/runner"{
+          icon.near: center-left
+          label.near: center-center
+          icon: https://cdn.jsdelivr.net/gh/selfhst/icons@main/svg/forgejo-light.svg
+        }
+        n8n: "n8nio/n8n" {
+          class: sky
+          icon.near: center-left
+          label.near: center-center
+          icon: https://cdn.jsdelivr.net/gh/selfhst/icons@main/svg/n8n-light.svg
+        }
+        apprise: "caronc/apprise"{
+          icon.near: center-left
+          label.near: center-center
+          icon: https://cdn.jsdelivr.net/gh/selfhst/icons@main/svg/apprise-light.svg
+        }
+        semaphore: "semaphoreui/semaphore*" {
+          class: sky
+          icon.near: center-left
+          label.near: center-center
+          icon: https://cdn.jsdelivr.net/gh/selfhst/icons@main/svg/semaphore-light.svg
+        }
+        ntfy: "binwiederhier/ntfy" {
+          icon.near: center-left
+          label.near: center-center
+          icon: https://cdn.jsdelivr.net/gh/selfhst/icons@main/svg/ntfy-light.svg
+        }
+        blank0: {
+          style.opacity: 0
+        }
+        atuin: "atuinsh/atuin" {
+          icon.near: center-left
+          label.near: center-center
+          icon: https://cdn.jsdelivr.net/gh/selfhst/icons@main/svg/atuin-light.svg
+        }
+      }
+      productivity: Producticity {
+        style: {
+          font-size: 25
+          bold: true
+        }
+        grid-rows: 7
+        grid-columns: 2
+        vertical-gap: 25
+        horizontal-gap: 25
+        vikunja: "vikunja/vikunja" {
+          class: sky
+          icon.near: center-left
+          label.near: center-center
+          icon: https://cdn.jsdelivr.net/gh/selfhst/icons@main/svg/vikunja-light.svg
+        }
+        degoog: "degoog-org/degoog" {
+          icon.near: center-left
+          label.near: center-center
+          icon: https://cdn.jsdelivr.net/gh/selfhst/icons@main/svg/degoog-light.svg
+        }
+        mealie: "mealie-recipes/mealie" {
+          icon.near: center-left
+          label.near: center-center
+          icon: https://cdn.jsdelivr.net/gh/selfhst/icons@main/svg/mealie-light.svg
+        }
+        anki: "afrima/anki-sync-server" {
+          icon.near: center-left
+          label.near: center-center
+          icon: https://cdn.jsdelivr.net/gh/selfhst/icons@main/svg/anki-light.svg
+        }
+        homebox: "sysadminsmedia/homebox" {
+          class: sky
+          icon.near: center-left
+          label.near: center-center
+          icon: https://cdn.jsdelivr.net/gh/selfhst/icons@main/svg/homebox-light.svg
+        }
+        actual: "actualbudget/actual-server" {
+          icon.near: center-left
+          label.near: center-center
+          icon: https://cdn.jsdelivr.net/gh/selfhst/icons@main/svg/actual-budget-light.svg
+        }
+        grist: "gristlabs/grist" {
+          style.fill: "linear-gradient(#f4a261, #27E7F5)"
+          icon.near: center-left
+          label.near: center-center
+          icon: https://cdn.jsdelivr.net/gh/selfhst/icons@main/svg/grist-light.svg
+        }
+        blank1: {
+          style.opacity: 0
+        }
+        snapotter: "snapotter/snapotter" {
+          style.fill: "linear-gradient(#f4a261, #27E7F5)"
+          icon.near: center-left
+          label.near: center-center
+          icon: https://cdn.jsdelivr.net/gh/selfhst/icons@main/svg/an-otter-wiki-light.svg
+        }
+        blank2: {
+          style.opacity: 0
+        }
+        umap: "umap/umap" {
+          style.fill: "linear-gradient(#f4a261, #27E7F5)"
+          icon.near: center-left
+          label.near: center-center
+          icon: https://cdn.jsdelivr.net/gh/selfhst/icons@main/svg/atuin-light.svg
+        }
+        blank3: {
+          style.opacity: 0
+        }
+        linkwarden: "linkwarden/linkwarden" {
+          style.fill: "linear-gradient(#f4a261, #F527E7)"
+          icon.near: center-left
+          label.near: center-center
+          icon: https://cdn.jsdelivr.net/gh/selfhst/icons@main/svg/google-maps-light.svg
+        }
+      }
+      media: Media & Entertainment {
+        style: {
+          font-size: 25
+          bold: true
+        }
+        grid-rows: 2
+        grid-columns: 2
+        vertical-gap: 25
+        horizontal-gap: 25
+        freshrss: "linuxserver/freshrss" {
+          class: sky
+          icon.near: center-left
+          label.near: center-center
+          icon: https://cdn.jsdelivr.net/gh/selfhst/icons@main/svg/freshrss-light.svg
+        }
+        audiobookshelf: "advplyr/audiobookshelf" {
+          icon.near: center-left
+          label.near: center-center
+          icon: https://cdn.jsdelivr.net/gh/selfhst/icons@main/svg/audiobookshelf-light.svg
+        }
+        paperless: "paperless-ngx/paperless-ngx" {
+          icon.near: center-left
+          label.near: center-center
+          icon: https://cdn.jsdelivr.net/gh/selfhst/icons@main/svg/paperless-ngx-light.svg
+          style.fill: "linear-gradient(#f4a261, #27E7F5)"
+        }
+        syncthing: "linuxserver/syncthing" {
+          icon.near: center-left
+          label.near: center-center
+          icon: https://cdn.jsdelivr.net/gh/selfhst/icons@main/svg/syncthing-light.svg
+        }
+        immich: "immich-app/immich-server" {
+          icon.near: center-left
+          label.near: center-center
+          icon: https://cdn.jsdelivr.net/gh/selfhst/icons@main/svg/immich-light.svg
+          style.fill: "linear-gradient(#f4a261, #27E7F5)"
+        }
+        navidrome: "deluan/navidrome" {
+          icon.near: center-left
+          label.near: center-center
+          icon: https://cdn.jsdelivr.net/gh/selfhst/icons@main/svg/navidrome-light.svg
+        }
+        yamtrack: "fuzzygrim/yamtrack" {
+          icon.near: center-left
+          label.near: center-center
+          icon: https://cdn.jsdelivr.net/gh/selfhst/icons@main/svg/yamtrack-light.svg
+          style.fill: "linear-gradient(#f4a261, #27E7F5)"
+        }
+        koito: "gabehf/koito" {
+          icon.near: center-left
+          label.near: center-center
+          icon: https://cdn.jsdelivr.net/gh/selfhst/icons@main/svg/koito-light.svg
+        }
+        pelican: "pelican/panel" {
+          icon.near: center-left
+          label.near: center-center
+          icon: https://cdn.jsdelivr.net/gh/selfhst/icons@main/svg/pelican-panel-light.svg
+          style.fill: "linear-gradient(#f4a261, #27E7F5)"
+        }
+        komga: "gotson/komga" {
+          icon.near: center-left
+          label.near: center-center
+          icon: https://cdn.jsdelivr.net/gh/selfhst/icons@main/svg/komga-light.svg
+        }
+        blank6: {
+          style.opacity: 0
+        }
+        jellyfin: "linuxserver/jellyfin" {
+          icon.near: center-left
+          label.near: center-center
+          icon: https://cdn.jsdelivr.net/gh/selfhst/icons@main/svg/jellyfin-light.svg
+        }
+        blank7: {
+          style.opacity: 0
+        }
+        calibre: "crocodilestick/calibre-web-automated" {
+          icon.near: center-left
+          label.near: center-center
+          icon: https://cdn.jsdelivr.net/gh/selfhst/icons@main/svg/calibre-web-light.svg
+        }
+      }
+      iot: IOT {
+        style: {
+          font-size: 25
+          bold: true
+        }
+        grid-rows: 7
+        grid-columns: 2
+        vertical-gap: 25
+        horizontal-gap: 25
+        z2m: "koenkk/zigbee2mqtt" {
+          class: green
+          icon.near: center-left
+          label.near: center-center
+          icon: https://cdn.jsdelivr.net/gh/selfhst/icons@main/svg/zigbee2mqtt-light.svg
+        }
+        homeassistant: "home-assistant/home-assistant" {
+          icon.near: center-left
+          label.near: center-center
+          icon: https://cdn.jsdelivr.net/gh/selfhst/icons@main/svg/home-assistant-light.svg
+        }
+        matter: "matter-js/matterjs-server" {
+          class: teal
+          icon.near: center-left
+          label.near: center-center
+          icon: https://cdn.jsdelivr.net/gh/selfhst/icons@main/svg/matter-light.svg
+        }
+        sane: "sbs20/scanservjs" {
+          icon.near: center-left
+          label.near: center-center
+          icon: https://cdn.jsdelivr.net/gh/selfhst/icons@main/svg/nextcloud-office-document-light.svg
+        }
+        blank9: {
+          style.opacity: 0
+        }
+        ultrafeeder: "sdr-enthusiasts/docker-adsb-ultrafeeder" {
+          icon.near: center-left
+          label.near: center-center
+          icon: .assets/icons/sdr-enthusiasts.svg
+        }
+        blank10: {
+          style.opacity: 0
+        }
+        sendspin: "trudenboy/sendspin-bt-bridge" {
+          icon.near: center-left
+          label.near: center-center
+          icon: https://cdn.jsdelivr.net/gh/selfhst/icons@main/svg/bluetooth-light.svg
+        }
+        blank11: {
+          style.opacity: 0
+        }
+        musicassistant: "music-assistant/server" {
+          icon.near: center-left
+          label.near: center-center
+          icon: https://cdn.jsdelivr.net/gh/selfhst/icons@main/svg/music-assistant-light.svg
+        }
+        blank12: {
+          style.opacity: 0
+        }
+        esphome: "esphome/esphome" {
+          icon.near: center-left
+          label.near: center-center
+          icon: https://cdn.jsdelivr.net/gh/selfhst/icons@main/svg/esphome-light.svg
+        }
+      }
+      gluetun_net: "" {
+        grid-rows: 2
+        grid-columns: 1
+        vertical-gap: 0
+        horizontal-gap: 0
+        width: 450
+        style: {
+          font-size: 25
+          bold: true
+        }
+
+        this_icon: {
+          label: "network_mode: qmcgaw/gluetun"
+          label.near: center-center
+          icon: https://cdn.jsdelivr.net/gh/selfhst/icons@main/svg/gluetun-light.svg
+          icon.near: center-left
+          width: 500
+          height: 40
+          style: {
+            fill: transparent
+            font-size: 25
+          }
+        }
+
+        body: {
+          label: ""
+          grid-rows: 1
+          grid-columns: 1
+          vertical-gap: 0
+          horizontal-gap: 25
+          style: {
+            fill: transparent
+            stroke-width: 0
+          }
+          byparr: "alpine-base*" {
+            width: 350
+            icon.near: center-left
+            label.near: center-center
+            icon: https://cdn.jsdelivr.net/gh/selfhst/icons@main/svg/alpine-linux-light.svg
+          }
+        }
+      }
+    }
+  }
+  row2: {
+    grid-rows: 1
+    vertical-gap: 0
+    horizontal-gap: 50
+    style: {
+      opacity: 0
+    }
+    data_net: {
+      label: "Networks: [Data]"
+      style: {
+        font-size: 25
+        bold: true
+      }
+      shape: rectangle
+      grid-rows: 1
+      grid-columns: 5
+      horizontal-gap: 25
+      vertical-gap: 25
+      mariadb: "linuxserver/mariadb" {
+        shape: cylinder
+        icon.near: center-left
+        label.near: center-center
+        icon: https://cdn.jsdelivr.net/gh/selfhst/icons@main/svg/mariadb-light.svg
+        style: {
+          stroke-width: 2
+          stroke: ${frappe._text}
+        }
+        width: 300
+        height: 100
+      }
+      obsidian: "couchdb" {
+        shape: cylinder
+        icon.near: center-left
+        label.near: center-center
+        icon: https://cdn.jsdelivr.net/gh/selfhst/icons@main/svg/couchdb-light.svg
+        style: {
+          stroke-width: 2
+          stroke: ${frappe._text}
+        }
+        width: 300
+        height: 100
+      }
+      meili: "getmeili/meilisearch" {
+        icon.near: center-left
+        label.near: center-center
+        icon: https://cdn.jsdelivr.net/gh/selfhst/icons@main/svg/meilisearch-light.svg
+        shape: cylinder
+        style.stroke-width: 2
+        class: pink
+        width: 300
+        height: 100
+      }
+      redis: "valkey/valkey" {
+        icon.near: center-left
+        label.near: center-center
+        icon: https://cdn.jsdelivr.net/gh/selfhst/icons@main/svg/valkey-light.svg
+        shape: cylinder
+        style.stroke-width: 2
+        class: peach
+        width: 300
+        height: 100
+      }
+      postgres: "immich-app/postgres*" {
+        shape: cylinder
+        icon.near: center-left
+        label.near: center-center
+        icon: https://cdn.jsdelivr.net/gh/selfhst/icons@main/svg/postgresql-light.svg
+        class: green
+        style: {
+          stroke-width: 2
+        }
+        width: 300
+        height: 100
+      }
+    }
+    wings0_net: {
+      label: "Networks: [Wings0]"
+      style: {
+        font-size: 25
+        bold: true
+      }
+      shape: rectangle
+      wings: "pelican/wings" {
+        icon.near: center-left
+        label.near: center-center
+        icon: https://cdn.jsdelivr.net/gh/selfhst/icons@main/svg/pelican-panel-light.svg
+      }
+      grid-rows: 1
+      grid-columns: 1
+      horizontal-gap: 25
+      vertical-gap: 75
+    }
+    default_net: {
+      label: "Networks: [Default]"
+      style: {
+        font-size: 25
+        bold: true
+      }
+      shape: rectangle
+      grid-rows: 1
+      grid-columns: 5
+      horizontal-gap: 25
+      vertical-gap: 75
+      mosquitto: "eclipse-mosquitto" {
+        class: green
+        icon.near: center-left
+        label.near: center-center
+        icon: https://cdn.jsdelivr.net/gh/selfhst/icons@main/svg/mosquitto-light.svg
+      }
+      otbr: "openthread/border-router" {
+        class: teal
+        icon.near: center-left
+        label.near: center-center
+        icon: https://cdn.jsdelivr.net/gh/selfhst/icons@main/svg/thread-light.svg
+      }
+      beets: "linuxserver/beets" {
+        icon.near: center-left
+        label.near: center-center
+        icon: https://cdn.jsdelivr.net/gh/selfhst/icons@main/svg/beets-light.svg
+      }
+      onnx: "tboby/wyoming-onnx-asr" {
+        icon.near: center-left
+        label.near: center-center
+        icon: https://cdn.jsdelivr.net/gh/selfhst/icons@main/svg/nvidia-light.svg
+      }
+      piper: "linuxserver/piper" {
+        icon.near: center-left
+        label.near: center-center
+        icon: https://cdn.jsdelivr.net/gh/selfhst/icons@main/svg/piper-tts-light.svg
+      }
+    }
+  }
+}
