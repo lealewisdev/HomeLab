@@ -37,18 +37,19 @@ Infrastucture as code for a NixOS based server hosting 70+ services in one Docke
 - **Snapshot of a live system.** Files are copied from the running host, so paths differ from the layout here. For example, `configuration.nix` lives in `/etc/nixos` and each custom image sits in its own build context beside `compose.yaml`. Secrets, environment files and machine-specific configuration are omitted.
 
 ## Screenshots
-![n8n Forgejo action status pipeline](.assets/images/jorgejo-action-status.png "n8n pipeline called across multiple repositories")
+![n8n Forgejo action status pipeline](.assets/images/forgejo-action-status.png "n8n pipeline called across multiple repositories")
 
 ![n8n Docker image deployment pipeline](.assets/images/docker-image-deployment.png "n8n pipeline called primarily by my [ADSB telemetry API project](https://github.com/lealewisdev/OverheadADS-B)")
 
 ![Glance Dashboard](.assets/images/glance-dashboard.png "Dashboard for quick status overview and acessing services")
 
-![Grafana Dashboard](.assets/images/grafana-dashboard.png "Dashboard for detailed status overview of Server (exluding service uptime, HTTP probe duration and router traffic by device))
+![Grafana Dashboard](.assets/images/grafana-dashboard.png "Dashboard for detailed status overview of Server (exluding service uptime, HTTP probe duration and router traffic by device)")
 
 ## TODO
+- Finish D2 diagrams
 - Secondary OpenBSD server for hosting websites
-- Hardening Postgres user priviledges
+- Hardening PostgreSQL user privileges
 - Convert primary servers primary drive to ZFS + ZFS snapshots
-- Create and host new service to replace Canon Selphy app
+- Create and host new service to replace 'Canon Selphy' app
 
 **Skills demonstrated:** infrastructure as code · CI/CD and supply-chain security · container orchestration · network segmentation · secrets management · observability · Linux system administration
