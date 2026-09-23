@@ -42,18 +42,12 @@ machine-specific IDs are redacted.
 
 | Directory | Role | Key technologies |
 | --- | --- | --- |
-| [`docker/`](docker/) | The platform: Main 59-service Compose stack featuring
- three custom images | Docker Compose, Traefik, PostgreSQL, Grafana Alloy |
-| [`forgejo/`](forgejo/) | CI/CD pipeline: build, scan, sign, publish |
- Forgejo Actions, Trivy, cosign, Renovate |
-| [`n8n/`](n8n/) | Orchestration between CI, deployment and notifications |
- n8n, Apprise, ntfy |
-| [`semaphore/`](semaphore/) | Deploy and rollback playbooks |
- Ansible, Semaphore |
-| [`nix/`](nix/) | Declarative host configuration |
-NixOS, disko, Home Manager, sops-nix |
-| [`grafana/`](grafana/) | Telemetry collection and server dashboard |
- Grafana Alloy, Grafana, VictoriaMetrics, VictoriaLogs |
+| [`docker/`](docker/) | The platform: Main 59-service Compose stack featuring three custom images | Docker Compose, Traefik, PostgreSQL, Grafana Alloy |
+| [`forgejo/`](forgejo/) | CI/CD pipeline: build, scan, sign, publish | Forgejo Actions, Trivy, cosign, Renovate |
+| [`n8n/`](n8n/) | Orchestration between CI, deployment and notifications | n8n, Apprise, ntfy |
+| [`semaphore/`](semaphore/) | Deploy and rollback playbooks | Ansible, Semaphore |
+| [`nix/`](nix/) | Declarative host configuration | NixOS, disko, Home Manager, sops-nix |
+| [`grafana/`](grafana/) | Telemetry collection and server dashboard | Grafana Alloy, Grafana, VictoriaMetrics, VictoriaLogs |
 
 ## Screenshots
 
