@@ -1,0 +1,59 @@
+default_install_hook_types = ["pre-commit", "commit-msg", "pre-push"]
+
+[[repos]]
+repo = "builtin"
+hooks = [
+    { id = "trailing-whitespace" },
+    { id = "end-of-file-fixer" },
+    { id = "check-added-large-files" },
+]
+
+[[repos]]
+repo = "https://github.com/hadolint/hadolint"
+rev = "v2.15.1"
+hooks = [
+    { id = "hadolint-docker" },
+]
+
+[[repos]]
+repo = "https://github.com/trufflesecurity/trufflehog"
+rev = "v3.97.1"
+hooks = [
+    { id = "trufflehog" },
+]
+
+[[repos]]
+repo = "https://github.com/docker-compose-linter/pre-commit-dclint"
+rev = "v3.0.0"
+hooks = [
+  { id = "dclint", files = "^docker/(docker-)?compose\\.ya?ml$", args = ["-c", ".config/.dclintrc"] },
+]
+
+[[repos]]
+repo = "https://github.com/igorshubovych/markdownlint-cli"
+rev = "v0.49.1"
+hooks = [
+    { id = "markdownlint" },
+]
+
+[[repos]]
+repo = "https://github.com/commitizen-tools/commitizen"
+rev = "v4.18.1" # automatically updated by Commitizen
+hooks = [
+    { id = "commitizen" },
+    { id = "commitizen-branch", stages = ["pre-push"] },
+]
+
+[[repos]]
+repo = "https://github.com/adrienverge/yamllint"
+rev = "v1.38.0"
+hooks = [
+    { id = "yamllint", files = { glob = [".forgejo/workflows/**"] } },
+]
+
+[[repos]]
+repo = "https://github.com/ansible/ansible-lint"
+rev = "v25.11.0"
+hooks = [
+  { id = "ansible-lint", files = "^semaphore/", pass_filenames = true, always_run = false },
+]
