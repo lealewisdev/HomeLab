@@ -188,7 +188,7 @@ nixos: {
       grid-columns: 3
       horizontal-gap: 0
       vertical-gap: 0
-      height: 60
+      height: 100
       style: {
         fill: transparent
         stroke-width: 0
@@ -202,7 +202,7 @@ nixos: {
 
       this_icon: {
         label: "Networks: [traefik/traefik]"
-        label.near: center-center
+        label.near: top-center
         icon: https://cdn.jsdelivr.net/gh/selfhst/icons@main/svg/traefik-light.svg
         icon.near: top-left
         width: 500
@@ -284,30 +284,96 @@ nixos: {
         grid-columns: 2
         vertical-gap: 25
         horizontal-gap: 25
-        git: "forgejo/forgejo" {
-          icon.near: center-left
-          label.near: center-center
-          icon: https://cdn.jsdelivr.net/gh/selfhst/icons@main/svg/forgejo-light.svg
+        git: {
+          label: ""
+          grid-rows: 1
+          grid-columns: 2
+          horizontal-gap: 6
+          vertical-gap: 0
+          width: 350
+          height: 50
+          style: { fill: transparent; stroke-width: 0 }
+          main: "forgejo/forgejo" {
+            icon.near: center-left
+            label.near: center-center
+            icon: https://cdn.jsdelivr.net/gh/selfhst/icons@main/svg/forgejo-light.svg
+            width: 324
+            height: 50
+            style.stroke-width: 0
+          }
+          deps: {
+            label: ""
+            grid-rows: 1
+            grid-columns: 1
+            width: 20
+            height: 50
+            style: { fill: transparent; stroke-width: 0 }
+            d1: { label: ""; width: 16; height: 16; style: { fill: ${frappe.green}; stroke-width: 0; border-radius: 999 } }
+          }
         }
         git_runner: "forgejo/runner"{
           icon.near: center-left
           label.near: center-center
           icon: https://cdn.jsdelivr.net/gh/selfhst/icons@main/svg/forgejo-light.svg
         }
-        n8n: "n8nio/n8n" {
-          icon.near: center-left
-          label.near: center-center
-          icon: https://cdn.jsdelivr.net/gh/selfhst/icons@main/svg/n8n-light.svg
+        n8n: {
+          label: ""
+          grid-rows: 1
+          grid-columns: 2
+          horizontal-gap: 6
+          vertical-gap: 0
+          width: 350
+          height: 50
+          style: { fill: transparent; stroke-width: 0 }
+          main: "n8nio/n8n" {
+            icon.near: center-left
+            label.near: center-center
+            icon: https://cdn.jsdelivr.net/gh/selfhst/icons@main/svg/n8n-light.svg
+            width: 324
+            height: 50
+            style.stroke-width: 0
+          }
+          deps: {
+            label: ""
+            grid-rows: 1
+            grid-columns: 1
+            width: 20
+            height: 50
+            style: { fill: transparent; stroke-width: 0 }
+            d1: { label: ""; width: 16; height: 16; style: { fill: ${frappe.green}; stroke-width: 0; border-radius: 999 } }
+          }
         }
         apprise: "caronc/apprise"{
           icon.near: center-left
           label.near: center-center
           icon: https://cdn.jsdelivr.net/gh/selfhst/icons@main/svg/apprise-light.svg
         }
-        semaphore: "semaphoreui/semaphore*" {
-          icon.near: center-left
-          label.near: center-center
-          icon: https://cdn.jsdelivr.net/gh/selfhst/icons@main/svg/semaphore-light.svg
+        semaphore: {
+          label: ""
+          grid-rows: 1
+          grid-columns: 2
+          horizontal-gap: 6
+          vertical-gap: 0
+          width: 350
+          height: 50
+          style: { fill: transparent; stroke-width: 0 }
+          main: "semaphoreui/semaphore*" {
+            icon.near: center-left
+            label.near: center-center
+            icon: https://cdn.jsdelivr.net/gh/selfhst/icons@main/svg/semaphore-light.svg
+            width: 324
+            height: 50
+            style.stroke-width: 0
+          }
+          deps: {
+            label: ""
+            grid-rows: 1
+            grid-columns: 1
+            width: 20
+            height: 50
+            style: { fill: transparent; stroke-width: 0 }
+            d1: { label: ""; width: 16; height: 16; style: { fill: ${frappe.green}; stroke-width: 0; border-radius: 999 } }
+          }
         }
         ntfy: "binwiederhier/ntfy" {
           icon.near: center-left
@@ -317,10 +383,32 @@ nixos: {
         blank0: {
           style.opacity: 0
         }
-        atuin: "atuinsh/atuin" {
-          icon.near: center-left
-          label.near: center-center
-          icon: https://cdn.jsdelivr.net/gh/selfhst/icons@main/svg/atuin-light.svg
+        atuin: {
+          label: ""
+          grid-rows: 1
+          grid-columns: 2
+          horizontal-gap: 6
+          vertical-gap: 0
+          width: 350
+          height: 50
+          style: { fill: transparent; stroke-width: 0 }
+          main: "atuinsh/atuin" {
+            icon.near: center-left
+            label.near: center-center
+            icon: https://cdn.jsdelivr.net/gh/selfhst/icons@main/svg/atuin-light.svg
+            width: 324
+            height: 50
+            style.stroke-width: 0
+          }
+          deps: {
+            label: ""
+            grid-rows: 1
+            grid-columns: 1
+            width: 20
+            height: 50
+            style: { fill: transparent; stroke-width: 0 }
+            d1: { label: ""; width: 16; height: 16; style: { fill: ${frappe.green}; stroke-width: 0; border-radius: 999 } }
+          }
         }
       }
       productivity: Producticity {
@@ -332,30 +420,118 @@ nixos: {
         grid-columns: 2
         vertical-gap: 25
         horizontal-gap: 25
-        vikunja: "vikunja/vikunja" {
-          icon.near: center-left
-          label.near: center-center
-          icon: https://cdn.jsdelivr.net/gh/selfhst/icons@main/svg/vikunja-light.svg
+        vikunja: {
+          label: ""
+          grid-rows: 1
+          grid-columns: 2
+          horizontal-gap: 6
+          vertical-gap: 0
+          width: 350
+          height: 50
+          style: { fill: transparent; stroke-width: 0 }
+          main: "vikunja/vikunja" {
+            icon.near: center-left
+            label.near: center-center
+            icon: https://cdn.jsdelivr.net/gh/selfhst/icons@main/svg/vikunja-light.svg
+            width: 324
+            height: 50
+            style.stroke-width: 0
+          }
+          deps: {
+            label: ""
+            grid-rows: 1
+            grid-columns: 1
+            width: 20
+            height: 50
+            style: { fill: transparent; stroke-width: 0 }
+            d1: { label: ""; width: 16; height: 16; style: { fill: ${frappe.green}; stroke-width: 0; border-radius: 999 } }
+          }
         }
-        degoog: "degoog-org/degoog" {
-          icon.near: center-left
-          label.near: center-center
-          icon: https://cdn.jsdelivr.net/gh/selfhst/icons@main/svg/degoog-light.svg
+        degoog: {
+          label: ""
+          grid-rows: 1
+          grid-columns: 2
+          horizontal-gap: 6
+          vertical-gap: 0
+          width: 350
+          height: 50
+          style: { fill: transparent; stroke-width: 0 }
+          main: "degoog-org/degoog" {
+            icon.near: center-left
+            label.near: center-center
+            icon: https://cdn.jsdelivr.net/gh/selfhst/icons@main/svg/degoog-light.svg
+            width: 324
+            height: 50
+            style.stroke-width: 0
+          }
+          deps: {
+            label: ""
+            grid-rows: 1
+            grid-columns: 1
+            width: 20
+            height: 50
+            style: { fill: transparent; stroke-width: 0 }
+            d1: { label: ""; width: 16; height: 16; style: { fill: ${frappe.green}; stroke-width: 0; border-radius: 999 } }
+          }
         }
-        mealie: "mealie-recipes/mealie" {
-          icon.near: center-left
-          label.near: center-center
-          icon: https://cdn.jsdelivr.net/gh/selfhst/icons@main/svg/mealie-light.svg
+        mealie: {
+          label: ""
+          grid-rows: 1
+          grid-columns: 2
+          horizontal-gap: 6
+          vertical-gap: 0
+          width: 350
+          height: 50
+          style: { fill: transparent; stroke-width: 0 }
+          main: "mealie-recipes/mealie" {
+            icon.near: center-left
+            label.near: center-center
+            icon: https://cdn.jsdelivr.net/gh/selfhst/icons@main/svg/mealie-light.svg
+            width: 324
+            height: 50
+            style.stroke-width: 0
+          }
+          deps: {
+            label: ""
+            grid-rows: 1
+            grid-columns: 1
+            width: 20
+            height: 50
+            style: { fill: transparent; stroke-width: 0 }
+            d1: { label: ""; width: 16; height: 16; style: { fill: ${frappe.green}; stroke-width: 0; border-radius: 999 } }
+          }
         }
         anki: "afrima/anki-sync-server" {
           icon.near: center-left
           label.near: center-center
           icon: https://cdn.jsdelivr.net/gh/selfhst/icons@main/svg/anki-light.svg
         }
-        homebox: "sysadminsmedia/homebox" {
-          icon.near: center-left
-          label.near: center-center
-          icon: https://cdn.jsdelivr.net/gh/selfhst/icons@main/svg/homebox-light.svg
+        homebox: {
+          label: ""
+          grid-rows: 1
+          grid-columns: 2
+          horizontal-gap: 6
+          vertical-gap: 0
+          width: 350
+          height: 50
+          style: { fill: transparent; stroke-width: 0 }
+          main: "sysadminsmedia/homebox" {
+            icon.near: center-left
+            label.near: center-center
+            icon: https://cdn.jsdelivr.net/gh/selfhst/icons@main/svg/homebox-light.svg
+            width: 324
+            height: 50
+            style.stroke-width: 0
+          }
+          deps: {
+            label: ""
+            grid-rows: 1
+            grid-columns: 1
+            width: 20
+            height: 50
+            style: { fill: transparent; stroke-width: 0 }
+            d1: { label: ""; width: 16; height: 16; style: { fill: ${frappe.green}; stroke-width: 0; border-radius: 999 } }
+          }
         }
         actual: "actualbudget/actual-server" {
           icon.near: center-left
@@ -501,10 +677,32 @@ nixos: {
         grid-columns: 2
         vertical-gap: 25
         horizontal-gap: 25
-        freshrss: "linuxserver/freshrss" {
-          icon.near: center-left
-          label.near: center-center
-          icon: https://cdn.jsdelivr.net/gh/selfhst/icons@main/svg/freshrss-light.svg
+        freshrss: {
+          label: ""
+          grid-rows: 1
+          grid-columns: 2
+          horizontal-gap: 6
+          vertical-gap: 0
+          width: 350
+          height: 50
+          style: { fill: transparent; stroke-width: 0 }
+          main: "linuxserver/freshrss" {
+            icon.near: center-left
+            label.near: center-center
+            icon: https://cdn.jsdelivr.net/gh/selfhst/icons@main/svg/freshrss-light.svg
+            width: 324
+            height: 50
+            style.stroke-width: 0
+          }
+          deps: {
+            label: ""
+            grid-rows: 1
+            grid-columns: 1
+            width: 20
+            height: 50
+            style: { fill: transparent; stroke-width: 0 }
+            d1: { label: ""; width: 16; height: 16; style: { fill: ${frappe.green}; stroke-width: 0; border-radius: 999 } }
+          }
         }
         audiobookshelf: "advplyr/audiobookshelf" {
           icon.near: center-left
