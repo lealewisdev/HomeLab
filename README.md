@@ -36,7 +36,7 @@ machine-specific IDs are redacted.
 7. **Observe:** [Grafana Alloy](https://github.com/grafana/alloy),
  [VictoriaMetrics](https://github.com/VictoriaMetrics/VictoriaMetrics) and
  [Grafana](https://github.com/grafana/grafana) cover metrics and logs, with
- quick acessability via [Glance](https://github.com/glanceapp/glance).
+ quick access via [Glance](https://github.com/glanceapp/glance).
 
 ## Components
 
@@ -51,32 +51,33 @@ machine-specific IDs are redacted.
 
 ## Screenshots
 
-![n8n Forgejo action status pipeline](.assets/images/forgejo-action-status.png
- "n8n pipeline called across multiple repositories")
+![n8n Forgejo action status pipeline](.assets/images/forgejo-action-status.png)
+**n8n pipeline called across multiple repositories**
 
-![n8n Docker image deployment pipeline](.assets/images/docker-image-deployment.png
- "n8n pipeline called primarily by my [ADSB telemetry API project](https://github.com/lealewisdev/OverheadADS-B)")
+![n8n Docker image deployment pipeline](.assets/images/docker-image-deployment.png)
+**n8n pipeline called primarily by my
+ [ADSB telemetry API project](https://github.com/lealewisdev/OverheadADS-B)**
 
-![Glance Dashboard](.assets/images/glance-dashboard.png
-"Dashboard for quick status overview and acessing services")
+![Glance Dashboard](.assets/images/glance-dashboard.png)
+**Dashboard for quick status overview and accessing services**
 
 ![Grafana Dashboard](.assets/images/grafana-dashboard.png
-"Dashboard for detailed status overview of Server (exluding service uptime, HTTP
- probe duration and router traffic by device)")
+**Dashboard for detailed status overview of the server (excluding service
+uptime, HTTP probe duration and router traffic by device)**
 
 ## TODO
 
 - Finish D2 diagrams
-- Set up secondary OpenBSD server for hosting externally acessible websites
+- Set up secondary OpenBSD server for hosting externally accessible websites
 - Harden PostgreSQL user privileges
-- Convert primary servers primary drive to ZFS + ZFS snapshots
+- Convert primary server's primary drive to ZFS + ZFS snapshots
 - Create and host new service to replace 'Canon Selphy' app
 - Re-flash router with vanilla OpenWRT
 
 ## Not Planned
 
-- **Failover** Availability relies on restart policies, health checks and
- monitoring, although I would prefer to migrate from Docker Compose to K3's.
+- **Failover**: Availability relies on restart policies, health checks and
+ monitoring, although I would prefer to migrate from Docker Compose to K3s.
 
 **Skills demonstrated:** IAC · CI/CD and supply-chain security ·
  container orchestration · network segmentation · secrets management ·
