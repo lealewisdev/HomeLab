@@ -12,7 +12,7 @@ Infrastucture as code for a NixOS based server hosting 70+ services in one Docke
 4. **Recover:** If the deployment fails, n8n starts a rollback task and reports the outcome through [Apprise](https://github.com/caronc/apprise), escalating if the rollback fails too.
 5. **Run:** The target is a [Docker Compose](https://github.com/docker/compose) stack behind [Traefik](https://github.com/traefik/traefik), on a [NixOS](https://github.com/NixOS/nixpkgs) host with [ZFS](https://github.com/openzfs/zfs) storage.
 6. **Access:** Default-deny firewall, segmented Docker networks, and privileged mode confined to hardware-bound services. All services, except for one public game server, are  only reachable from the local network or via an the Wireguard server hosted on my OpenWRT-based router.
-7. **Observe:* [Grafana Alloy](https://github.com/grafana/alloy), [VictoriaMetrics](https://github.com/VictoriaMetrics/VictoriaMetrics) and [Grafana](https://github.com/grafana/grafana) cover metrics and logs, with quick acessability via [Glance](https://github.com/glanceapp/glance).
+7. **Observe:** [Grafana Alloy](https://github.com/grafana/alloy), [VictoriaMetrics](https://github.com/VictoriaMetrics/VictoriaMetrics) and [Grafana](https://github.com/grafana/grafana) cover metrics and logs, with quick acessability via [Glance](https://github.com/glanceapp/glance).
 
 ## Components
 
