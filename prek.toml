@@ -30,6 +30,13 @@ hooks = [
 ]
 
 [[repos]]
+repo = "https://github.com/igorshubovych/markdownlint-cli"
+rev = "v0.49.1"
+hooks = [
+    { id = "markdownlint" },
+]
+
+[[repos]]
 repo = "https://github.com/commitizen-tools/commitizen"
 rev = "v4.18.1" # automatically updated by Commitizen
 hooks = [
