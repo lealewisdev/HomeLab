@@ -1,0 +1,150 @@
+// GENERAL
+
+logging {
+  level = "info"
+}
+
+// DATA SOURCES
+
+prometheus.remote_write "victoriametrics" {
+  endpoint {
+    url = "http://victoriametrics:8428/api/v1/write"
+  }
+}
+
+loki.write "victorialogs" {
+  endpoint {
+    url = "http://victorialogs:9428/insert/loki/api/v1/push"
+  }
+}
+
+// ROUTER STATS
+
+prometheus.scrape "openwrt_nlbwmon" {
+  targets = [{ "__address__" = "192.168.1.1:9100"},]
+  metrics_path    = "/metrics"
+  params = {"collect[]" = ["nlbwmon"],}
+  scrape_interval = "60s"
+  forward_to = [prometheus.remote_write.victoriametrics.receiver]
+}
+
+// HOST STATS
+
+prometheus.exporter.unix "host" {
+  rootfs_path = "/rootfs"
+  sysfs_path  = "/sys"
+  procfs_path = "/host/proc"
+
+  enable_collectors = ["cpu", "meminfo", "diskstats", "filesystem", "loadavg", "netdev", "uname"]
+
+  filesystem {
+    fs_types_exclude     = "^(autofs|binfmt_misc|bpf|cgroup2?|configfs|debugfs|devpts|devtmpfs|tmpfs|fusectl|hugetlbfs|iso9660|mqueue|nsfs|overlay|proc|procfs|pstore|rpc_pipefs|securityfs|selinuxfs|squashfs|sysfs|tracefs)$"
+    mount_points_exclude = "^/(dev|proc|run/credentials/.+|sys|var/lib/docker/.+)($|/)"
+    mount_timeout        = "5s"
+  }
+}
+
+discovery.relabel "host" {
+  targets = prometheus.exporter.unix.host.targets
+
+  rule {
+    target_label = "instance"
+    replacement  = constants.hostname
+  }
+}
+
+prometheus.scrape "host" {
+  targets         = discovery.relabel.host.output
+  forward_to      = [prometheus.remote_write.victoriametrics.receiver]
+  scrape_interval = "60s"
+}
+
+// CONTAINER STATS
+
+prometheus.scrape "containers" {
+  targets         = [{ "__address__" = "cadvisor:8080", "instance" = constants.hostname }]
+  forward_to      = [prometheus.remote_write.victoriametrics.receiver]
+  scrape_interval = "60s"
+}
+
+// CONTAINER LOGS
+
+discovery.docker "containers" {
+  host = "unix:///var/run/docker.sock"
+}
+
+discovery.relabel "container_logs" {
+  targets = []
+
+  rule {
+    source_labels = ["__meta_docker_container_name"]
+    regex         = "/(.*)"
+    target_label  = "container"
+  }
+
+  rule {
+    source_labels = ["__meta_docker_container_label_com_docker_compose_service"]
+    target_label  = "compose_service"
+  }
+
+  rule {
+    source_labels = ["__meta_docker_container_label_com_docker_compose_project"]
+    target_label  = "compose_project"
+  }
+
+  rule {
+    target_label = "instance"
+    replacement  = constants.hostname
+  }
+}
+
+loki.source.docker "containers" {
+  host          = "unix:///var/run/docker.sock"
+  targets       = discovery.docker.containers.targets
+  relabel_rules = discovery.relabel.container_logs.rules
+  forward_to    = [loki.write.victorialogs.receiver]
+}
+
+// CONTAINER UPTIME
+
+discovery.relabel "uptime_targets" {
+  targets = discovery.docker.containers.targets
+  rule {
+    source_labels = ["__meta_docker_container_label_uptime_enable"]
+    regex         = "true"
+    action        = "keep"
+  }
+  rule {
+    source_labels = ["__meta_docker_container_label_uptime_address"]
+    target_label  = "__address__"
+  }
+  rule {
+    source_labels = ["__meta_docker_container_label_com_docker_compose_service"]
+    target_label  = "name"
+  }
+  rule {
+    target_label = "module"
+    replacement  = "http_2xx"
+  }
+}
+
+prometheus.exporter.blackbox "uptime" {
+  config = "{ modules: { http_2xx: { prober: http, timeout: 5s } } }"
+
+  targets = discovery.relabel.uptime_targets.output
+}
+
+discovery.relabel "uptime_instance" {
+  targets = prometheus.exporter.blackbox.uptime.targets
+
+  rule {
+    source_labels = ["__param_target"]
+    target_label  = "instance"
+  }
+}
+
+prometheus.scrape "uptime" {
+  targets         = discovery.relabel.uptime_instance.output
+  forward_to      = [prometheus.remote_write.victoriametrics.receiver]
+  scrape_interval = "60s"
+}
