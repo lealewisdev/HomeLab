@@ -45,6 +45,7 @@
     micro.enable = true;
     tmux.enable = true;
     fish.enable = true;
+    yazi.enable = true;
   };
   programs.atuin = {
     enable = true;

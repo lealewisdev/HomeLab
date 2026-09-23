@@ -140,15 +140,6 @@
 
   hardware.sane.enable = true;
   hardware.enableAllFirmware = true;
-  hardware.bluetooth.package = pkgs.bluez.overrideAttrs (prevAttrs: {
-    patches = prevAttrs.patches ++ [
-      (pkgs.fetchpatch {
-        name = "fix-bluetooth-connect-order.patch";
-        url = "https://github.com/bluez/bluez/commit/066a164a524e4983b850f5659b921cb42f84a0e0.patch";
-        hash = "sha256-I1WoBJZEZJ05hwGuksp52I4FLJ+jbG9t7U2sLTFmU0w=";
-      })
-    ];
-  });
   hardware.bluetooth = {
     enable = true;
     powerOnBoot = true;
