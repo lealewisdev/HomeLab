@@ -1,6 +1,6 @@
 # Docker Compose Stack
 
-Main 59 self-hosted services defined in one [Docker Compose](https://github.com/docker/compose) project, plus three custom container images.
+70+ self-hosted services defined in one [Docker Compose](https://github.com/docker/compose) project, plus three custom container images.
 
 ## Highlights
 
@@ -23,12 +23,12 @@ On the host, each Dockerfile sits in its own build context (`./byparr`, `./postg
 
 ## How it works
 
-<!-- d2 diagram to be added: LAN clients -> gluetun + byparr SSH container -> external server running Byparr -->
+<!-- d2 diagram to be added: LAN clients -> gluetun (WireGuard, publishes :8191) + byparr SSH container (shared namespace) -> external server running Byparr -->
 
 | Area | Approach |
 | --- | --- |
 | Networks | `traefik` (edge bridge, static Traefik address, dynamic allocation confined to the upper half of the subnet), `data` (internal bridge for Postgres, Valkey, [MariaDB](https://github.com/MariaDB/server), [Meilisearch](https://github.com/meilisearch/meilisearch)), `gluetun` (VPN container), `wings0` (game servers via [Pelican Wings](https://github.com/pelican-dev/wings)), plus host networking for mDNS, Thread and Bluetooth. |
-| Observability | [Grafana Alloy](https://github.com/grafana/alloy) collects telemetry, [VictoriaMetrics](https://github.com/VictoriaMetrics/VictoriaMetrics) and [VictoriaLogs](https://github.com/VictoriaMetrics/VictoriaLogs) store it, [Grafana](https://github.com/grafana/grafana) visualises it, and [cAdvisor](https://github.com/google/cadvisor) covers containers. Alerts go out through [ntfy](https://github.com/binwiederhier/ntfy) and [Apprise](https://github.com/caronc/apprise-api). |
+| Observability | [Grafana Alloy](https://github.com/grafana/alloy) collects telemetry, [VictoriaMetrics](https://github.com/VictoriaMetrics/VictoriaMetrics) and [VictoriaLogs](https://github.com/VictoriaMetrics/VictoriaLogs) store it, [Grafana](https://github.com/grafana/grafana) visualises it, and [cAdvisor](https://github.com/google/cadvisor) covers containers. Alerts go out through [ntfy](https://github.com/binwiederhier/ntfy) and [Apprise](https://github.com/caronc/apprise-api). The Alloy pipeline and dashboard live in [`grafana/`](../grafana/). |
 | Home automation | [Home Assistant](https://github.com/home-assistant/core), [Zigbee2MQTT](https://github.com/Koenkk/zigbee2mqtt), the [Matter server](https://github.com/matter-js/matterjs-server) and the [OpenThread Border Router](https://github.com/openthread/ot-br-posix) run with host networking through one privileged anchor. |
 | Scraping offload | Byparr's headless browser is CPU-heavy, so it runs on an external server. The local container shares [Gluetun](https://github.com/qdm12/gluetun)'s network namespace, so its SSH tunnel leaves through WireGuard, and Gluetun publishes the forwarded port on the LAN. |
 

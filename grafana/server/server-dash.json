@@ -2,7 +2,7 @@
   "apiVersion": "dashboard.grafana.app/v2",
   "kind": "Dashboard",
   "metadata": {
-    "name": "server-overview"
+    "name": "server-dash"
   },
   "spec": {
     "annotations": [
@@ -477,9 +477,11 @@
                       "group": "prometheus",
                       "kind": "DataQuery",
                       "spec": {
-                        "expr": "probe_success{instance=~\"$target\"}",
-                        "format": "time_series",
-                        "legendFormat": "{{ instance }}"
+                        "editorMode": "code",
+                        "expr": "sum by (instance) (probe_success{instance=~\"$target\"})",
+                        "format": "table",
+                        "instant": true,
+                        "range": false
                       },
                       "version": "v0"
                     },
@@ -487,9 +489,7 @@
                   }
                 }
               ],
-              "queryOptions": {
-                "maxDataPoints": 100
-              },
+              "queryOptions": {},
               "transformations": []
             }
           },
@@ -498,11 +498,22 @@
           "links": [],
           "title": "Probe Status",
           "vizConfig": {
-            "group": "stat",
+            "group": "table",
             "kind": "VizConfig",
             "spec": {
               "fieldConfig": {
                 "defaults": {
+                  "color": {
+                    "fixedColor": "text",
+                    "mode": "fixed"
+                  },
+                  "custom": {
+                    "align": "auto",
+                    "cellOptions": {
+                      "type": "auto"
+                    },
+                    "inspect": false
+                  },
                   "mappings": [
                     {
                       "options": {
@@ -516,39 +527,100 @@
                       "type": "value"
                     }
                   ],
-                  "thresholds": {
-                    "mode": "absolute",
-                    "steps": [
+                  "unit": "none"
+                },
+                "overrides": [
+                  {
+                    "matcher": {
+                      "id": "byName",
+                      "options": "Time"
+                    },
+                    "properties": [
                       {
-                        "color": "#e78284",
-                        "value": 0
-                      },
-                      {
-                        "color": "#a6d189",
-                        "value": 1
+                        "id": "custom.hidden",
+                        "value": true
                       }
                     ]
                   },
-                  "unit": "none"
-                },
-                "overrides": []
+                  {
+                    "matcher": {
+                      "id": "byName",
+                      "options": "instance"
+                    },
+                    "properties": [
+                      {
+                        "id": "displayName",
+                        "value": "Target"
+                      },
+                      {
+                        "id": "custom.width",
+                        "value": 260
+                      }
+                    ]
+                  },
+                  {
+                    "matcher": {
+                      "id": "byName",
+                      "options": "Value"
+                    },
+                    "properties": [
+                      {
+                        "id": "displayName",
+                        "value": "Status"
+                      },
+                      {
+                        "id": "color",
+                        "value": {
+                          "mode": "thresholds"
+                        }
+                      },
+                      {
+                        "id": "thresholds",
+                        "value": {
+                          "mode": "absolute",
+                          "steps": [
+                            {
+                              "color": "#e78284",
+                              "value": 0
+                            },
+                            {
+                              "color": "#a6d189",
+                              "value": 1
+                            }
+                          ]
+                        }
+                      },
+                      {
+                        "id": "custom.cellOptions",
+                        "value": {
+                          "type": "color-text"
+                        }
+                      },
+                      {
+                        "id": "custom.width",
+                        "value": 120
+                      }
+                    ]
+                  }
+                ]
               },
               "options": {
-                "colorMode": "background",
-                "graphMode": "none",
-                "justifyMode": "auto",
-                "orientation": "horizontal",
-                "percentChangeColorMode": "standard",
-                "reduceOptions": {
-                  "calcs": [
-                    "lastNotNull"
-                  ],
+                "cellHeight": "sm",
+                "footer": {
+                  "countRows": false,
                   "fields": "",
-                  "values": false
+                  "reducer": [
+                    "sum"
+                  ],
+                  "show": false
                 },
-                "showPercentChange": false,
-                "textMode": "auto",
-                "wideLayout": true
+                "showHeader": true,
+                "sortBy": [
+                  {
+                    "desc": false,
+                    "displayName": "Status"
+                  }
+                ]
               }
             },
             "version": "13.2.1"
@@ -2028,36 +2100,54 @@
             "kind": "RowsLayoutRow",
             "spec": {
               "collapse": false,
-              "fillScreen": true,
               "layout": {
-                "kind": "AutoGridLayout",
+                "kind": "GridLayout",
                 "spec": {
-                  "columnWidthMode": "standard",
                   "items": [
                     {
-                      "kind": "AutoGridLayoutItem",
+                      "kind": "GridLayoutItem",
                       "spec": {
                         "element": {
                           "kind": "ElementReference",
                           "name": "panel-14"
-                        }
+                        },
+                        "height": 14,
+                        "width": 24,
+                        "x": 0,
+                        "y": 0
                       }
-                    },
+                    }
+                  ]
+                }
+              },
+              "title": "Probe Status"
+            }
+          },
+          {
+            "kind": "RowsLayoutRow",
+            "spec": {
+              "collapse": false,
+              "layout": {
+                "kind": "GridLayout",
+                "spec": {
+                  "items": [
                     {
-                      "kind": "AutoGridLayoutItem",
+                      "kind": "GridLayoutItem",
                       "spec": {
                         "element": {
                           "kind": "ElementReference",
                           "name": "panel-15"
-                        }
+                        },
+                        "height": 9,
+                        "width": 24,
+                        "x": 0,
+                        "y": 0
                       }
                     }
-                  ],
-                  "maxColumnCount": 3,
-                  "rowHeightMode": "standard"
+                  ]
                 }
               },
-              "title": "Network Probes"
+              "title": "Probe Duration"
             }
           },
           {
@@ -2097,7 +2187,7 @@
                   ]
                 }
               },
-              "title": "Router Traffic (No data transmitted while outbound VPN is connected)"
+              "title": "Router Traffic"
             }
           }
         ]
@@ -2130,7 +2220,7 @@
       "timezone": "browser",
       "to": "now"
     },
-    "title": "Server Overview",
+    "title": "Server Dash",
     "variables": [
       {
         "kind": "DatasourceVariable",

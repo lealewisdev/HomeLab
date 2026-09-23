@@ -137,12 +137,23 @@ classes: {
 (*** -> ***)[*]: {
   style.border-radius: 999
 }
-
+direction: down
 internet: Internet {
   shape: cloud
+  style: {
+    font-size: 35
+    bold: true
+  }
 }
-router: {}
+router: {
+  style: {
+    font-size: 35
+    bold: true
+  }
+}
 internet -> router
+router -> internet:VPN
+router -> nixos
 nixos.**: {
   &leaf: true
   width: 350
@@ -164,7 +175,7 @@ nixos: {
     label: ""
     grid-rows: 2
     grid-columns: 1
-    vertical-gap: 25
+    vertical-gap: 10
     horizontal-gap: 0
     style: {
       font-size: 25
@@ -177,21 +188,21 @@ nixos: {
       grid-columns: 3
       horizontal-gap: 0
       vertical-gap: 0
-      height: 100
+      height: 60
       style: {
         fill: transparent
         stroke-width: 0
       }
 
       lefty: {
-        width: 2075
+        width: 1812
         height: 100
         style.opacity: 0
       }
 
       this_icon: {
         label: "Networks: [traefik/traefik]"
-        label.near: center-center
+        label.near: top-center
         icon: https://cdn.jsdelivr.net/gh/selfhst/icons@main/svg/traefik-light.svg
         icon.near: center-left
         width: 500
@@ -204,7 +215,7 @@ nixos: {
       }
 
       right: {
-        width: 2075
+        width: 1813
         style.opacity: 0
       }
     }
@@ -356,38 +367,134 @@ nixos: {
           label.near: center-center
           icon: https://cdn.jsdelivr.net/gh/selfhst/icons@main/svg/actual-budget-light.svg
         }
-        grist: "gristlabs/grist" {
-          style.fill: "linear-gradient(#f4a261, #27E7F5)"
-          icon.near: center-left
-          label.near: center-center
-          icon: https://cdn.jsdelivr.net/gh/selfhst/icons@main/svg/grist-light.svg
+        grist: {
+          label: ""
+          grid-rows: 1
+          grid-columns: 2
+          horizontal-gap: 6
+          vertical-gap: 0
+          width: 350
+          height: 50
+          style: { fill: transparent; stroke-width: 0 }
+          main: "gristlabs/grist" {
+            icon.near: center-left
+            label.near: center-center
+            icon: https://cdn.jsdelivr.net/gh/selfhst/icons@main/svg/grist-light.svg
+            width: 324
+            height: 50
+            style.stroke-width: 0
+          }
+          deps: {
+            label: ""
+            grid-rows: 2
+            grid-columns: 1
+            vertical-gap: 4
+            horizontal-gap: 0
+            width: 20
+            height: 50
+            style: { fill: transparent; stroke-width: 0 }
+            d1: { label: ""; width: 16; height: 16; style: { fill: ${frappe.green}; stroke-width: 0; border-radius: 999 } }
+            d2: { label: ""; width: 16; height: 16; style: { fill: ${frappe.peach}; stroke-width: 0; border-radius: 999 } }
+          }
         }
         blank1: {
           style.opacity: 0
         }
-        snapotter: "snapotter/snapotter" {
-          style.fill: "linear-gradient(#f4a261, #27E7F5)"
-          icon.near: center-left
-          label.near: center-center
-          icon: https://cdn.jsdelivr.net/gh/selfhst/icons@main/svg/an-otter-wiki-light.svg
+        snapotter: {
+          label: ""
+          grid-rows: 1
+          grid-columns: 2
+          horizontal-gap: 6
+          vertical-gap: 0
+          width: 350
+          height: 50
+          style: { fill: transparent; stroke-width: 0 }
+          main: "snapotter/snapotter" {
+            icon.near: center-left
+            label.near: center-center
+            icon: https://cdn.jsdelivr.net/gh/selfhst/icons@main/svg/an-otter-wiki-light.svg
+            width: 324
+            height: 50
+            style.stroke-width: 0
+          }
+          deps: {
+            label: ""
+            grid-rows: 2
+            grid-columns: 1
+            vertical-gap: 4
+            horizontal-gap: 0
+            width: 20
+            height: 50
+            style: { fill: transparent; stroke-width: 0 }
+            d1: { label: ""; width: 16; height: 16; style: { fill: ${frappe.green}; stroke-width: 0; border-radius: 999 } }
+            d2: { label: ""; width: 16; height: 16; style: { fill: ${frappe.peach}; stroke-width: 0; border-radius: 999 } }
+          }
         }
         blank2: {
           style.opacity: 0
         }
-        umap: "umap/umap" {
-          style.fill: "linear-gradient(#f4a261, #27E7F5)"
-          icon.near: center-left
-          label.near: center-center
-          icon: https://cdn.jsdelivr.net/gh/selfhst/icons@main/svg/atuin-light.svg
+        umap: {
+          label: ""
+          grid-rows: 1
+          grid-columns: 2
+          horizontal-gap: 6
+          vertical-gap: 0
+          width: 350
+          height: 50
+          style: { fill: transparent; stroke-width: 0 }
+          main: "umap/umap" {
+            icon.near: center-left
+            label.near: center-center
+            icon: https://cdn.jsdelivr.net/gh/selfhst/icons@main/svg/atuin-light.svg
+            width: 324
+            height: 50
+            style.stroke-width: 0
+          }
+          deps: {
+            label: ""
+            grid-rows: 2
+            grid-columns: 1
+            vertical-gap: 4
+            horizontal-gap: 0
+            width: 20
+            height: 50
+            style: { fill: transparent; stroke-width: 0 }
+            d1: { label: ""; width: 16; height: 16; style: { fill: ${frappe.green}; stroke-width: 0; border-radius: 999 } }
+            d2: { label: ""; width: 16; height: 16; style: { fill: ${frappe.peach}; stroke-width: 0; border-radius: 999 } }
+          }
         }
         blank3: {
           style.opacity: 0
         }
-        linkwarden: "linkwarden/linkwarden" {
-          style.fill: "linear-gradient(#f4a261, #F527E7)"
-          icon.near: center-left
-          label.near: center-center
-          icon: https://cdn.jsdelivr.net/gh/selfhst/icons@main/svg/google-maps-light.svg
+        linkwarden: {
+          label: ""
+          grid-rows: 1
+          grid-columns: 2
+          horizontal-gap: 6
+          vertical-gap: 0
+          width: 350
+          height: 50
+          style: { fill: transparent; stroke-width: 0 }
+          main: "linkwarden/linkwarden" {
+            icon.near: center-left
+            label.near: center-center
+            icon: https://cdn.jsdelivr.net/gh/selfhst/icons@main/svg/google-maps-light.svg
+            width: 324
+            height: 50
+            style.stroke-width: 0
+          }
+          deps: {
+            label: ""
+            grid-rows: 2
+            grid-columns: 1
+            vertical-gap: 4
+            horizontal-gap: 0
+            width: 20
+            height: 50
+            style: { fill: transparent; stroke-width: 0 }
+            d1: { label: ""; width: 16; height: 16; style: { fill: ${frappe.green}; stroke-width: 0; border-radius: 999 } }
+            d2: { label: ""; width: 16; height: 16; style: { fill: ${frappe.pink}; stroke-width: 0; border-radius: 999 } }
+          }
         }
       }
       media: Media & Entertainment {
@@ -410,44 +517,140 @@ nixos: {
           label.near: center-center
           icon: https://cdn.jsdelivr.net/gh/selfhst/icons@main/svg/audiobookshelf-light.svg
         }
-        paperless: "paperless-ngx/paperless-ngx" {
-          icon.near: center-left
-          label.near: center-center
-          icon: https://cdn.jsdelivr.net/gh/selfhst/icons@main/svg/paperless-ngx-light.svg
-          style.fill: "linear-gradient(#f4a261, #27E7F5)"
+        paperless: {
+          label: ""
+          grid-rows: 1
+          grid-columns: 2
+          horizontal-gap: 6
+          vertical-gap: 0
+          width: 350
+          height: 50
+          style: { fill: transparent; stroke-width: 0 }
+          main: "paperless-ngx/paperless-ngx" {
+            icon.near: center-left
+            label.near: center-center
+            icon: https://cdn.jsdelivr.net/gh/selfhst/icons@main/svg/paperless-ngx-light.svg
+            width: 324
+            height: 50
+            style.stroke-width: 0
+          }
+          deps: {
+            label: ""
+            grid-rows: 2
+            grid-columns: 1
+            vertical-gap: 4
+            horizontal-gap: 0
+            width: 20
+            height: 50
+            style: { fill: transparent; stroke-width: 0 }
+            d1: { label: ""; width: 16; height: 16; style: { fill: ${frappe.green}; stroke-width: 0; border-radius: 999 } }
+            d2: { label: ""; width: 16; height: 16; style: { fill: ${frappe.peach}; stroke-width: 0; border-radius: 999 } }
+          }
         }
         syncthing: "linuxserver/syncthing" {
           icon.near: center-left
           label.near: center-center
           icon: https://cdn.jsdelivr.net/gh/selfhst/icons@main/svg/syncthing-light.svg
         }
-        immich: "immich-app/immich-server" {
-          icon.near: center-left
-          label.near: center-center
-          icon: https://cdn.jsdelivr.net/gh/selfhst/icons@main/svg/immich-light.svg
-          style.fill: "linear-gradient(#f4a261, #27E7F5)"
+        immich: {
+          label: ""
+          grid-rows: 1
+          grid-columns: 2
+          horizontal-gap: 6
+          vertical-gap: 0
+          width: 350
+          height: 50
+          style: { fill: transparent; stroke-width: 0 }
+          main: "immich-app/immich-server" {
+            icon.near: center-left
+            label.near: center-center
+            icon: https://cdn.jsdelivr.net/gh/selfhst/icons@main/svg/immich-light.svg
+            width: 324
+            height: 50
+            style.stroke-width: 0
+          }
+          deps: {
+            label: ""
+            grid-rows: 2
+            grid-columns: 1
+            vertical-gap: 4
+            horizontal-gap: 0
+            width: 20
+            height: 50
+            style: { fill: transparent; stroke-width: 0 }
+            d1: { label: ""; width: 16; height: 16; style: { fill: ${frappe.green}; stroke-width: 0; border-radius: 999 } }
+            d2: { label: ""; width: 16; height: 16; style: { fill: ${frappe.peach}; stroke-width: 0; border-radius: 999 } }
+          }
         }
         navidrome: "deluan/navidrome" {
           icon.near: center-left
           label.near: center-center
           icon: https://cdn.jsdelivr.net/gh/selfhst/icons@main/svg/navidrome-light.svg
         }
-        yamtrack: "fuzzygrim/yamtrack" {
-          icon.near: center-left
-          label.near: center-center
-          icon: https://cdn.jsdelivr.net/gh/selfhst/icons@main/svg/yamtrack-light.svg
-          style.fill: "linear-gradient(#f4a261, #27E7F5)"
+        yamtrack: {
+          label: ""
+          grid-rows: 1
+          grid-columns: 2
+          horizontal-gap: 6
+          vertical-gap: 0
+          width: 350
+          height: 50
+          style: { fill: transparent; stroke-width: 0 }
+          main: "fuzzygrim/yamtrack" {
+            icon.near: center-left
+            label.near: center-center
+            icon: https://cdn.jsdelivr.net/gh/selfhst/icons@main/svg/yamtrack-light.svg
+            width: 324
+            height: 50
+            style.stroke-width: 0
+          }
+          deps: {
+            label: ""
+            grid-rows: 2
+            grid-columns: 1
+            vertical-gap: 4
+            horizontal-gap: 0
+            width: 20
+            height: 50
+            style: { fill: transparent; stroke-width: 0 }
+            d1: { label: ""; width: 16; height: 16; style: { fill: ${frappe.green}; stroke-width: 0; border-radius: 999 } }
+            d2: { label: ""; width: 16; height: 16; style: { fill: ${frappe.peach}; stroke-width: 0; border-radius: 999 } }
+          }
         }
         koito: "gabehf/koito" {
           icon.near: center-left
           label.near: center-center
           icon: https://cdn.jsdelivr.net/gh/selfhst/icons@main/svg/koito-light.svg
         }
-        pelican: "pelican/panel" {
-          icon.near: center-left
-          label.near: center-center
-          icon: https://cdn.jsdelivr.net/gh/selfhst/icons@main/svg/pelican-panel-light.svg
-          style.fill: "linear-gradient(#f4a261, #27E7F5)"
+        pelican: {
+          label: ""
+          grid-rows: 1
+          grid-columns: 2
+          horizontal-gap: 6
+          vertical-gap: 0
+          width: 350
+          height: 50
+          style: { fill: transparent; stroke-width: 0 }
+          main: "pelican/panel" {
+            icon.near: center-left
+            label.near: center-center
+            icon: https://cdn.jsdelivr.net/gh/selfhst/icons@main/svg/pelican-panel-light.svg
+            width: 324
+            height: 50
+            style.stroke-width: 0
+          }
+          deps: {
+            label: ""
+            grid-rows: 2
+            grid-columns: 1
+            vertical-gap: 4
+            horizontal-gap: 0
+            width: 20
+            height: 50
+            style: { fill: transparent; stroke-width: 0 }
+            d1: { label: ""; width: 16; height: 16; style: { fill: ${frappe.green}; stroke-width: 0; border-radius: 999 } }
+            d2: { label: ""; width: 16; height: 16; style: { fill: ${frappe.peach}; stroke-width: 0; border-radius: 999 } }
+          }
         }
         komga: "gotson/komga" {
           icon.near: center-left
@@ -508,7 +711,7 @@ nixos: {
         ultrafeeder: "sdr-enthusiasts/docker-adsb-ultrafeeder" {
           icon.near: center-left
           label.near: center-center
-          icon: .assets/icons/sdr-enthusiasts.svg
+          icon: ../icons/sdr-enthusiasts.svg
         }
         blank10: {
           style.opacity: 0
@@ -582,7 +785,7 @@ nixos: {
   row2: {
     grid-rows: 1
     vertical-gap: 0
-    horizontal-gap: 50
+    horizontal-gap: 43
     style: {
       opacity: 0
     }
@@ -710,5 +913,46 @@ nixos: {
         icon: https://cdn.jsdelivr.net/gh/selfhst/icons@main/svg/piper-tts-light.svg
       }
     }
+  }
+}
+
+legend: {
+  label: "Datastore key"
+  near: bottom-right
+  grid-rows: 3
+  grid-columns: 1
+  vertical-gap: 8
+  horizontal-gap: 0
+  style: { font-size: 20; bold: true; fill: transparent; stroke-width: 0 }
+
+  row_pg: {
+    label: ""
+    grid-rows: 1
+    grid-columns: 2
+    horizontal-gap: 10
+    vertical-gap: 0
+    style: { fill: transparent; stroke-width: 0 }
+    dot: { label: ""; width: 16; height: 16; style: { fill: ${frappe.green}; stroke-width: 0; border-radius: 999 } }
+    text: { label: "Postgres"; style: { font-color: ${frappe._text}; font-size: 20 } }
+  }
+  row_redis: {
+    label: ""
+    grid-rows: 1
+    grid-columns: 2
+    horizontal-gap: 10
+    vertical-gap: 0
+    style: { fill: transparent; stroke-width: 0 }
+    dot: { label: ""; width: 16; height: 16; style: { fill: ${frappe.peach}; stroke-width: 0; border-radius: 999 } }
+    text: { label: "Redis"; style: { font-color: ${frappe._text}; font-size: 20 } }
+  }
+  row_meili: {
+    label: ""
+    grid-rows: 1
+    grid-columns: 2
+    horizontal-gap: 10
+    vertical-gap: 0
+    style: { fill: transparent; stroke-width: 0 }
+    dot: { label: ""; width: 16; height: 16; style: { fill: ${frappe.pink}; stroke-width: 0; border-radius: 999 } }
+    text: { label: "Meilisearch"; style: { font-color: ${frappe._text}; font-size: 20 } }
   }
 }

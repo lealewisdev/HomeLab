@@ -21,6 +21,7 @@ Infrastucture as code for a NixOS based server hosting 70+ services in one Docke
 | [`n8n/`](n8n/) | Orchestration between CI, deployment and notifications | n8n, Apprise, ntfy |
 | [`semaphore/`](semaphore/) | Deploy and rollback playbooks | Ansible, Semaphore |
 | [`nix/`](nix/) | Declarative host configuration | NixOS, disko, Home Manager, sops-nix |
+| [`grafana/`](grafana/) | Telemetry collection and the Server Overview dashboard | Grafana Alloy, Grafana, VictoriaMetrics, VictoriaLogs |
 
 ## Highlights
 
