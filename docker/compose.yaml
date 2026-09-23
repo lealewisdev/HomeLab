@@ -1,3 +1,8 @@
+x-common: &common
+  env_file: ./common.env
+
+x-data: &data
+  networks: [ data ]
 x-gluetun: &gluetun
   depends_on:
     gluetun:
@@ -28,17 +33,11 @@ x-restart-log: &restart-log
       max-file: "3"
       compress: "true"
 
-x-common: &common
-  env_file: ./common.env
-
 x-traefik: &traefik
-  networks: [traefik]
-
-x-data: &data
-  networks: [data]
+  networks: [ traefik ]
 
 x-traefik-data: &traefik-data
-  networks: [traefik, data]
+  networks: [ traefik, data ]
 
 name: homelab
 
@@ -49,7 +48,7 @@ services:
     volumes:
       - ./actual:/data
     healthcheck:
-      test: ["CMD-SHELL", "node src/scripts/health-check.js"]
+      test: [ "CMD-SHELL", "node src/scripts/health-check.js" ]
       interval: 60s
       timeout: 10s
       retries: 3
@@ -62,13 +61,12 @@ services:
       - "uptime.enable=true"
       - "uptime.address=https://actual.${DOMAIN}"
       - "glance.category=Productivity"
-    <<: [*common, *restart-log, *traefik]
-    profiles: [prod]
+    <<: [ *common, *restart-log, *traefik ]
+    profiles: [ prod ]
 
   alloy:
     image: grafana/alloy:latest
     container_name: alloy
-    hostname: server
     volumes:
       - ./alloy/config.alloy:/etc/alloy/config.alloy:ro
       - /var/run/docker.sock:/var/run/docker.sock:ro
@@ -78,6 +76,8 @@ services:
       - /var/lib/docker/:/var/lib/docker:ro
       - /dev/disk/:/dev/disk:ro
       - /proc:/host/proc:ro
+    ports:
+      - '127.0.0.1:12345:12345'
     command: run --server.http.listen-addr=0.0.0.0:12345 /etc/alloy/config.alloy
     labels:
       - "traefik.enable=true"
@@ -87,32 +87,10 @@ services:
       - "uptime.enable=true"
       - "uptime.address=https://alloy.${DOMAIN}"
       - "glance.category=DevOps"
-    ports:
-      - "127.0.0.1:12345:12345"
-    <<: [*common, *restart-log, *traefik]
+    <<: [ *common, *restart-log, *traefik ]
+    hostname: server
     privileged: true
-    profiles: [prod]
-
-  cadvisor:
-    image: ghcr.io/google/cadvisor:0.54.0
-    container_name: cadvisor
-    command:
-      - "--docker_only=true"
-      - "--housekeeping_interval=60s"
-      - "--store_container_labels=true"
-      - "--disable_metrics=advtcp,cpu_topology,cpuset,hugetlb,memory_numa,process,referenced_memory,resctrl,sched,tcp,udp,percpu"
-      - "--whitelisted_container_labels=com.docker.compose.service,com.docker.compose.project"
-    volumes:
-      - /:/rootfs:ro
-      - /var/run/docker.sock:/var/run/docker.sock:ro
-      - /sys:/sys:ro
-      - /var/lib/docker/:/var/lib/docker:ro
-      - /dev/disk/:/dev/disk:ro
-    labels:
-      - "glance.category=DevOps"
-    <<: [*common, *restart-log, *traefik]
-    privileged: true
-    profiles: [prod]
+    profiles: [ prod ]
 
   anki:
     image: afrima/anki-sync-server:latest
@@ -127,11 +105,11 @@ services:
       - "traefik.http.routers.anki.rule=Host(`anki.${DOMAIN}`)"
       - "traefik.http.routers.anki.entrypoints=websecure"
       - "traefik.http.services.anki.loadbalancer.server.port=8080"
-#      - "uptime.enable=true"
-#      - "uptime.address=https://anki.${DOMAIN}"
+      #      - "uptime.enable=true"
+      #      - "uptime.address=https://anki.${DOMAIN}"
       - "glance.category=Productivity"
-    <<: [*common, *restart-log, *traefik]
-    profiles: [prod]
+    <<: [ *common, *restart-log, *traefik ]
+    profiles: [ prod ]
 
   apprise:
     image: caronc/apprise:latest
@@ -152,19 +130,19 @@ services:
       - "uptime.enable=true"
       - "uptime.address=https://apprise.${DOMAIN}"
       - "glance.category=DevOps"
-    <<: [*common, *restart-log, *traefik]
-    profiles: [prod]
+    <<: [ *common, *restart-log, *traefik ]
+    profiles: [ prod ]
 
   atuin:
     image: ghcr.io/atuinsh/atuin:latest
     container_name: atuin
-    command: start
     volumes:
       - ./atuin:/config
     environment:
       ATUIN_HOST: "0.0.0.0"
       ATUIN_OPEN_REGISTRATION: "true"
       RUST_LOG: info,atuin_server=debug
+    command: start
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.atuin.rule=Host(`atuin.${DOMAIN}`)"
@@ -173,8 +151,8 @@ services:
       - "uptime.enable=true"
       - "uptime.address=https://atuin.${DOMAIN}"
       - "glance.category=DevOps"
-    <<: [*restart-log, *traefik-data, *postgres]
-    profiles: [prod]
+    <<: [ *restart-log, *traefik-data, *postgres ]
+    profiles: [ prod ]
 
   audiobookshelf:
     image: ghcr.io/advplyr/audiobookshelf:latest
@@ -194,8 +172,8 @@ services:
       - "uptime.address=https://audio.${DOMAIN}"
       - "glance.category=Media"
     user: 1000:1000
-    <<: [*common, *restart-log, *traefik]
-    profiles: [prod]
+    <<: [ *common, *restart-log, *traefik ]
+    profiles: [ prod ]
 
   beets:
     image: lscr.io/linuxserver/beets:latest
@@ -207,8 +185,8 @@ services:
       - ./beets/run:/etc/s6-overlay/s6-rc.d/svc-beets/run:ro
     labels:
       - "glance.category=Media"
-    <<: [*common, *restart-log]
-    profiles: [prod]
+    <<: [ *common, *restart-log ]
+    profiles: [ prod ]
 
   byparr:
     build:
@@ -220,8 +198,29 @@ services:
       - ./byparr/config:/home/nonroot/.ssh/config:ro
     labels:
       - "glance.category=Media"
-    <<: [*common, *restart-log, *gluetun]
-    profiles: [prod]
+    <<: [ *common, *restart-log, *gluetun ]
+    profiles: [ prod ]
+
+  cadvisor:
+    image: ghcr.io/google/cadvisor:0.54.0
+    container_name: cadvisor
+    volumes:
+      - /:/rootfs:ro
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - /sys:/sys:ro
+      - /var/lib/docker/:/var/lib/docker:ro
+      - /dev/disk/:/dev/disk:ro
+    command:
+      - "--docker_only=true"
+      - "--housekeeping_interval=60s"
+      - "--store_container_labels=true"
+      - "--disable_metrics=advtcp,cpu_topology,cpuset,hugetlb,memory_numa,process,referenced_memory,resctrl,sched,tcp,udp,percpu"
+      - "--whitelisted_container_labels=com.docker.compose.service,com.docker.compose.project"
+    labels:
+      - "glance.category=DevOps"
+    <<: [ *common, *restart-log, *traefik ]
+    privileged: true
+    profiles: [ prod ]
 
   calibre:
     image: crocodilestick/calibre-web-automated:latest
@@ -230,7 +229,7 @@ services:
       - ./calibre:/config
       - /mnt/sata/calibre:/cwa-book-ingest
       - /mnt/sata/Media/Books:/calibre-library
-#      - ./calibre/config/calibre/plugins:/config/.config/calibre/plugins
+    #      - ./calibre/config/calibre/plugins:/config/.config/calibre/plugins
     environment:
       HARDCOVER_TOKEN: ${HARDCOVER}
     labels:
@@ -241,8 +240,8 @@ services:
       - "uptime.enable=true"
       - "uptime.address=https://books.${DOMAIN}"
       - "glance.category=Media"
-    <<: [*common, *restart-log, *traefik]
-    profiles: [prod]
+    <<: [ *common, *restart-log, *traefik ]
+    profiles: [ prod ]
 
   cloudbeaver:
     image: dbeaver/cloudbeaver:latest
@@ -257,8 +256,28 @@ services:
       - "uptime.enable=true"
       - "uptime.address=https://db.${DOMAIN}"
       - "glance.category=DevOps"
-    <<: [*common, *restart-log, *traefik-data]
-    profiles: [prod]
+    <<: [ *common, *restart-log, *traefik-data ]
+    profiles: [ prod ]
+
+  degoog:
+    image: ghcr.io/degoog-org/degoog:latest
+    container_name: degoog
+    volumes:
+      - ./degoog:/app/data
+    environment:
+      DEGOOG_PUBLIC_INSTANCE: "false"
+      DEGOOG_VALKEY_URL: ${REDIS_URL}/5
+      DEGOOG_DANGEROUSLY_NO_PASSWORD: true
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.degoog.rule=Host(`degoog.${DOMAIN}`)"
+      - "traefik.http.routers.degoog.entrypoints=websecure"
+      - "traefik.http.services.degoog.loadbalancer.server.port=4444"
+      - "uptime.enable=true"
+      - "uptime.address=https://degoog.${DOMAIN}"
+      - "glance.category=Productivity"
+    <<: [ *common, *restart-log, *traefik-data, *postgres ]
+    profiles: [ prod ]
 
   esphome:
     image: ghcr.io/esphome/esphome:latest
@@ -274,8 +293,26 @@ services:
       - "uptime.enable=true"
       - "uptime.address=https://esp.${DOMAIN}"
       - "glance.category=IOT"
-    <<: [*common, *restart-log, *privileged-host]
-    profiles: [prod]
+    <<: [ *common, *restart-log, *privileged-host ]
+    profiles: [ prod ]
+
+  freshrss:
+    image: lscr.io/linuxserver/freshrss:latest
+    container_name: freshrss
+    volumes:
+      - ./freshrss:/config
+    environment:
+      - POSTGRES_DB=freshrss
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.rss.rule=Host(`rss.${DOMAIN}`)"
+      - "traefik.http.routers.rss.entrypoints=websecure"
+      - "traefik.http.services.rss.loadbalancer.server.port=80"
+      - "uptime.enable=true"
+      - "uptime.address=https://rss.${DOMAIN}"
+      - "glance.category=Media"
+    <<: [ *common, *restart-log, *traefik-data, *postgres ]
+    profiles: [ prod ]
 
   git:
     image: codeberg.org/forgejo/forgejo:15
@@ -284,7 +321,7 @@ services:
       - ./git/forgejo:/data
       - /etc/localtime:/etc/localtime:ro
     ports:
-      - "${HOST_IP}:222:22/tcp"
+      - '${HOST_IP}:222:22/tcp'
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.git.rule=Host(`git.${DOMAIN}`)"
@@ -292,29 +329,29 @@ services:
       - "traefik.http.services.git.loadbalancer.server.port=3000"
       - "uptime.enable=true"
       - "uptime.address=https://git.${DOMAIN}"
-    <<: [*restart-log, *traefik-data, *postgres]
-    profiles: [prod]
+    <<: [ *restart-log, *traefik-data, *postgres ]
+    profiles: [ prod ]
 
   git_runner:
     image: "data.forgejo.org/forgejo/runner:13"
     container_name: git_runner
-    ports:
-      - 39080:39080
-      - 39081:39081
-    group_add:
-      - 131
     volumes:
       - ./git/runner/data:/data
       - /var/run/docker.sock:/var/run/docker.sock
+    ports:
+      - '39080:39080'
+      - '39081:39081'
     command: "forgejo-runner daemon --config runner-config.yml"
     labels:
       - "glance.category=DevOps"
-    <<: [*common, *restart-log, *traefik]
-    profiles: [prod]
+    <<: [ *common, *restart-log, *traefik ]
+    group_add:
+      - 131
+    profiles: [ prod ]
 
   glance:
-    container_name: glance
     image: glanceapp/glance:latest
+    container_name: glance
     volumes:
       - ./glance/config:/app/config
       - ./glance/assets:/app/assets
@@ -327,8 +364,8 @@ services:
       - "traefik.http.services.glance.loadbalancer.server.port=8080"
       - "uptime.enable=true"
       - "uptime.address=https://${DOMAIN}"
-    <<: [*common, *restart-log, *traefik]
-    profiles: [prod]
+    <<: [ *common, *restart-log, *traefik ]
+    profiles: [ prod ]
 
   gluetun:
     image: qmcgaw/gluetun:latest
@@ -346,22 +383,22 @@ services:
       WIREGUARD_PRESHARED_KEY: ${WIREGUARD_PRESHARED_KEY}
       WIREGUARD_ADDRESSES: ${WIREGUARD_ADDRESSES}
     ports:
-      - "${HOST_IP}:8388:8388/tcp" # gluetun shadowsocks
-      - "${HOST_IP}:8388:8388/udp" # gluetun shadowsocks
-      - "${HOST_IP}:8888:8888/tcp" # gluetun HTTP proxy
-      - "${HOST_IP}:8191:8191/tcp" # byparr
+      - '${HOST_IP}:8388:8388/tcp' # gluetun shadowsocks
+      - '${HOST_IP}:8388:8388/udp' # gluetun shadowsocks
+      - '${HOST_IP}:8888:8888/tcp' # gluetun HTTP proxy
+      - '${HOST_IP}:8191:8191/tcp' # byparr
     labels:
       - "glance.category=DevOps"
       - "traefik.enable=true"
       - "traefik.http.routers.gluetun.rule=Host(`gluetun.${DOMAIN}`)"
       - "traefik.http.routers.gluetun.service=gluetun"
       - "traefik.http.services.gluetun.loadbalancer.server.port=8000"
-    <<: [*common, *restart-log, *traefik-data]
+    <<: [ *common, *restart-log, *traefik-data ]
     cap_add:
       - NET_ADMIN
     devices:
       - /dev/net/tun:/dev/net/tun
-    profiles: [prod]
+    profiles: [ prod ]
 
   grafana:
     image: grafana/grafana-enterprise:latest
@@ -380,17 +417,17 @@ services:
       - "uptime.enable=true"
       - "uptime.address=https://grafana.${DOMAIN}"
       - "glance.category=DevOps"
-    <<: [*common, *restart-log, *traefik]
-    profiles: [prod]
+    <<: [ *common, *restart-log, *traefik ]
+    profiles: [ prod ]
 
   grist:
     image: gristlabs/grist:latest
     container_name: grist
+    volumes:
+      - ./grist:/persist
     environment:
       TYPEORM_DATABASE: grist
       REDIS_URL: ${REDIS_URL}/7
-    volumes:
-      - ./grist:/persist
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.grist.rule=Host(`sheets.${DOMAIN}`)"
@@ -399,8 +436,8 @@ services:
       - "uptime.enable=true"
       - "uptime.address=https://sheets.${DOMAIN}"
       - "glance.category=Productivity"
-    <<: [*restart-log, *traefik-data, *postgres]
-    profiles: [prod]
+    <<: [ *restart-log, *traefik-data, *postgres ]
+    profiles: [ prod ]
 
   homeassistant:
     image: ghcr.io/home-assistant/home-assistant:latest
@@ -413,11 +450,11 @@ services:
       - "uptime.enable=true"
       - "uptime.address=https://ha.${DOMAIN}"
       - "glance.category=IOT"
-    <<: [*common, *restart-log, *privileged-host]
+    <<: [ *common, *restart-log, *privileged-host ]
     cap_add:
       - NET_ADMIN
       - NET_RAW
-    profiles: [prod]
+    profiles: [ prod ]
 
   homebox:
     image: ghcr.io/sysadminsmedia/homebox:latest
@@ -438,8 +475,8 @@ services:
       - "uptime.enable=true"
       - "uptime.address=https://inventory.${DOMAIN}"
       - "glance.category=Productivity"
-    <<: [*restart-log, *traefik-data, *postgres]
-    profiles: [prod]
+    <<: [ *restart-log, *traefik-data, *postgres ]
+    profiles: [ prod ]
 
   immich:
     image: ghcr.io/immich-app/immich-server:release
@@ -460,8 +497,8 @@ services:
       - "uptime.enable=true"
       - "uptime.address=https://immich.${DOMAIN}"
       - "glance.category=Media"
-    <<: [*restart-log, *traefik-data, *postgres]
-    profiles: [prod]
+    <<: [ *restart-log, *traefik-data, *postgres ]
+    profiles: [ prod ]
 
   jellyfin:
     image: lscr.io/linuxserver/jellyfin:latest
@@ -479,8 +516,8 @@ services:
       - "uptime.enable=true"
       - "uptime.address=https://jellyfin.${DOMAIN}"
       - "glance.category=Media"
-    <<: [*common, *restart-log, *traefik]
-    profiles: [prod]
+    <<: [ *common, *restart-log, *traefik ]
+    profiles: [ prod ]
 
   koito:
     image: gabehf/koito:latest
@@ -501,8 +538,8 @@ services:
       - "uptime.enable=true"
       - "uptime.address=https://${KOITO}.${DOMAIN}"
       - "glance.category=Media"
-    <<: [*common, *restart-log, *traefik]
-    profiles: [prod]
+    <<: [ *common, *restart-log, *traefik ]
+    profiles: [ prod ]
 
   komga:
     image: gotson/komga:latest
@@ -518,8 +555,8 @@ services:
       - "uptime.enable=true"
       - "uptime.address=https://comics.${DOMAIN}"
       - "glance.category=Media"
-    <<: [*common, *restart-log, *traefik]
-    profiles: [prod]
+    <<: [ *common, *restart-log, *traefik ]
+    profiles: [ prod ]
 
   kopia:
     image: kopia/kopia:latest
@@ -551,9 +588,9 @@ services:
       - "uptime.enable=true"
       - "uptime.address=https://kopia.${DOMAIN}"
       - "glance.category=Productivity"
-    <<: [*restart-log, *traefik]
+    <<: [ *restart-log, *traefik ]
     hostname: kopia
-    profiles: [dev]
+    profiles: [ dev ]
 
   linkwarden:
     image: ghcr.io/linkwarden/linkwarden:latest
@@ -574,8 +611,8 @@ services:
       - "uptime.enable=true"
       - "uptime.address=https://bookmarks.${DOMAIN}"
       - "glance.category=Productivity"
-    <<: [*restart-log, *traefik-data, *postgres]
-    profiles: [prod]
+    <<: [ *restart-log, *traefik-data, *postgres ]
+    profiles: [ prod ]
 
   mariadb:
     image: lscr.io/linuxserver/mariadb:latest
@@ -588,25 +625,15 @@ services:
       MYSQL_USER: ${MARIADB_USER}
       MYSQL_PASSWORD: ${MARIADB_PASSWORD}
     healthcheck:
-      test:
-        [
-          "CMD",
-          "mariadb-admin",
-          "ping",
-          "-h",
-          "localhost",
-          "-u",
-          "${MARIADB_USER}",
-          "-p${MARIADB_PASSWORD}",
-        ]
+      test: [ "CMD", "mariadb-admin", "ping", "-h", "localhost", "-u", "${MARIADB_USER}", "-p${MARIADB_PASSWORD}" ]
       interval: 10s
       timeout: 5s
       retries: 5
       start_period: 30s
     labels:
       - "glance.category=DevOps"
-    <<: [*common, *restart-log, *data]
-    profiles: [prod]
+    <<: [ *common, *restart-log, *data ]
+    profiles: [ prod ]
 
   matter:
     image: ghcr.io/matter-js/matterjs-server:stable
@@ -626,8 +653,8 @@ services:
       - "uptime.enable=true"
       - "uptime.address=https://matter.${DOMAIN}"
       - "glance.category=IOT"
-    <<: [*common, *restart-log, *privileged-host]
-    profiles: [prod]
+    <<: [ *common, *restart-log, *privileged-host ]
+    profiles: [ prod ]
     security_opt:
       - apparmor:unconfined
 
@@ -648,42 +675,42 @@ services:
       - "uptime.enable=true"
       - "uptime.address=https://recipes.${DOMAIN}"
       - "glance.category=Productivity"
-    <<: [*restart-log, *traefik-data, *postgres]
-    profiles: [prod]
+    <<: [ *restart-log, *traefik-data, *postgres ]
+    profiles: [ prod ]
 
   meili:
     image: getmeili/meilisearch:latest
     container_name: meili
-    environment:
-      MEILI_UPGRADE_DB: true
     volumes:
       - ./meili:/meili_data
+    environment:
+      MEILI_UPGRADE_DB: true
     labels:
       - "glance.category=DevOps"
-    <<: [*common, *restart-log, *data]
-    profiles: [prod]
+    <<: [ *common, *restart-log, *data ]
+    profiles: [ prod ]
 
   mosquitto:
     image: eclipse-mosquitto:latest
     container_name: mosquitto
-    healthcheck:
-      test: ["CMD-SHELL", "mosquitto_sub -h localhost -t '$$SYS/#' -C 1 -i healthcheck -W 3 || exit 1"]
-      interval: 15s
-      timeout: 5s
-      retries: 3
     volumes:
       - ./mosquitto:/etc/mosquitto
       - ./mosquitto/mosquitto.conf:/mosquitto/config/mosquitto.conf
       - ./mosquitto/data:/mosquitto/data
       - ./mosquitto/log:/mosquitto/log
     ports:
-      - "${HOST_IP}:1883:1883/tcp"
-      - "${HOST_IP}:9001:9001/tcp"
+      - '${HOST_IP}:1883:1883/tcp'
+      - '${HOST_IP}:9001:9001/tcp'
+    healthcheck:
+      test: [ "CMD-SHELL", "mosquitto_sub -h localhost -t '$$SYS/#' -C 1 -i healthcheck -W 3 || exit 1" ]
+      interval: 15s
+      timeout: 5s
+      retries: 3
     labels:
       - "glance.category=IOT"
-    <<: [*common, *restart-log]
+    <<: [ *common, *restart-log ]
     hostname: mosquitto
-    profiles: [prod]
+    profiles: [ prod ]
 
   musicassistant:
     image: ghcr.io/music-assistant/server:latest
@@ -694,11 +721,11 @@ services:
       - "uptime.enable=true"
       - "uptime.address=https://ma.${DOMAIN}"
       - "glance.category=IOT"
-    <<: [*common, *restart-log, *privileged-host]
+    <<: [ *common, *restart-log, *privileged-host ]
     cap_add:
       - SYS_ADMIN
       - DAC_READ_SEARCH
-    profiles: [prod]
+    profiles: [ prod ]
     security_opt:
       - apparmor:unconfined
 
@@ -726,8 +753,8 @@ services:
       - "uptime.address=https://n8n.${DOMAIN}"
       - "glance.category=DevOps"
     user: "1000:1000"
-    <<: [*restart-log, *traefik-data, *postgres]
-    profiles: [prod]
+    <<: [ *restart-log, *traefik-data, *postgres ]
+    profiles: [ prod ]
 
   navidrome:
     image: deluan/navidrome:latest
@@ -746,8 +773,8 @@ services:
       - "uptime.enable=true"
       - "uptime.address=https://${NAVIDROME}.${DOMAIN}"
     user: 1000:1000
-    <<: [*common, *restart-log, *traefik]
-    profiles: [prod]
+    <<: [ *common, *restart-log, *traefik ]
+    profiles: [ prod ]
 
   ntfy:
     image: binwiederhier/ntfy:latest
@@ -765,19 +792,18 @@ services:
       - "uptime.enable=true"
       - "uptime.address=https://ntfy.${DOMAIN}"
       - "glance.category=DevOps"
-    <<: [*common, *restart-log, *traefik]
-    profiles: [prod]
+    <<: [ *common, *restart-log, *traefik ]
+    profiles: [ prod ]
 
   obsidian:
     image: couchdb:latest
     container_name: obsidian
-    user: 1000:1000
-    environment:
-      - COUCHDB_USER=${COUCHDB_USER}
-      - COUCHDB_PASSWORD=${COUCHDB_PASSWORD}
     volumes:
       - ./obsidian/data:/opt/couchdb/data
       - ./obsidian/etc:/opt/couchdb/etc/local.d
+    environment:
+      - COUCHDB_USER=${COUCHDB_USER}
+      - COUCHDB_PASSWORD=${COUCHDB_PASSWORD}
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.obsidian.rule=Host(`obsidian.${DOMAIN}`)"
@@ -790,8 +816,9 @@ services:
       - "traefik.http.middlewares.obsidiancors.headers.accesscontrolmaxage=3600"
       - "traefik.http.middlewares.obsidiancors.headers.addvaryheader=true"
       - "traefik.http.middlewares.obsidiancors.headers.accessControlAllowCredentials=true"
-    <<: [*common, *restart-log, *traefik-data]
-    profiles: [prod]
+    user: 1000:1000
+    <<: [ *common, *restart-log, *traefik-data ]
+    profiles: [ prod ]
 
   onnx:
     image: ghcr.io/tboby/wyoming-onnx-asr:latest
@@ -799,20 +826,15 @@ services:
     volumes:
       - ./onxx:/data
     ports:
-      - "${HOST_IP}:10300:10300/tcp"
+      - '${HOST_IP}:10300:10300/tcp'
     labels:
       - "glance.category=IOT"
-    <<: [*common, *restart-log]
-    profiles: [prod]
+    <<: [ *common, *restart-log ]
+    profiles: [ prod ]
 
   otbr:
     image: openthread/border-router:sha-8146f98
     container_name: otbr
-    healthcheck:
-      test: ["CMD-SHELL", "curl -sf http://localhost:7586/ || exit 1"]
-      interval: 15s
-      timeout: 5s
-      retries: 3
     volumes:
       - ./otbr:/data
       - /run/dbus:/run/dbus:ro
@@ -824,17 +846,22 @@ services:
       OT_WEB_LISTEN_PORT: 7586
       OT_REST_LISTEN_ADDR: 0.0.0.0
       OT_WEB_LISTEN_ADDR: 0.0.0.0
+    healthcheck:
+      test: [ "CMD-SHELL", "curl -sf http://localhost:7586/ || exit 1" ]
+      interval: 15s
+      timeout: 5s
+      retries: 3
     labels:
       - "uptime.enable=true"
       - "uptime.address=https://otbr.${DOMAIN}"
       - "glance.category=IOT"
-    <<: [*common, *restart-log, *privileged-host]
+    <<: [ *common, *restart-log, *privileged-host ]
     cap_add:
       - NET_ADMIN
     devices:
       - ${THREAD}:/dev/ttyUSB1
       - /dev/net/tun:/dev/net/tun
-    profiles: [prod]
+    profiles: [ prod ]
 
   paperless:
     image: ghcr.io/paperless-ngx/paperless-ngx:latest
@@ -858,8 +885,8 @@ services:
       - "uptime.enable=true"
       - "uptime.address=https://paperless.${DOMAIN}"
       - "glance.category=Media"
-    <<: [*restart-log, *traefik-data, *postgres]
-    profiles: [prod]
+    <<: [ *restart-log, *traefik-data, *postgres ]
+    profiles: [ prod ]
 
   pelican:
     image: ghcr.io/pelican/panel:latest
@@ -887,8 +914,8 @@ services:
       - "traefik.http.services.peli.loadbalancer.server.port=80"
       - "uptime.enable=true"
       - "uptime.address=https://peli.${DOMAIN}"
-    <<: [*common, *restart-log, *traefik-data, *postgres]
-    profiles: [prod]
+    <<: [ *common, *restart-log, *traefik-data, *postgres ]
+    profiles: [ prod ]
 
   piper:
     image: lscr.io/linuxserver/piper:latest
@@ -898,11 +925,11 @@ services:
     environment:
       PIPER_VOICE: en_US-lessac-medium
     ports:
-      - "${HOST_IP}:10200:10200/tcp"
+      - '${HOST_IP}:10200:10200/tcp'
     labels:
       - "glance.category=IOT"
-    <<: [*common, *restart-log]
-    profiles: [prod]
+    <<: [ *common, *restart-log ]
+    profiles: [ prod ]
 
   postgres:
     build:
@@ -915,55 +942,37 @@ services:
       POSTGRES_DB: ${PG}
     command: postgres -c shared_preload_libraries='vchord.so'
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${PG_USER} -d postgres"]
+      test: [ "CMD-SHELL", "pg_isready -U ${PG_USER} -d postgres" ]
       interval: 10s
       timeout: 5s
       retries: 5
       start_period: 10s
     labels:
       - "glance.category=DevOps"
-    <<: [*common, *restart-log, *data]
-    profiles: [prod]
+    <<: [ *common, *restart-log, *data ]
+    profiles: [ prod ]
 
   redis:
     image: docker.io/valkey/valkey:9-alpine
-    command: ["valkey-server", "--requirepass", "${REDIS_PASSWORD}"]
     container_name: redis
     volumes:
       - ./redis:/data
+    command: [ "valkey-server", "--requirepass", "${REDIS_PASSWORD}" ]
     labels:
       - "glance.category=DevOps"
-    <<: [*common, *restart-log, *data]
-    profiles: [prod]
-
-  freshrss:
-    image: lscr.io/linuxserver/freshrss:latest
-    container_name: freshrss
-    environment:
-      - POSTGRES_DB=freshrss
-    volumes:
-      - ./freshrss:/config
-    labels:
-      - "traefik.enable=true"
-      - "traefik.http.routers.rss.rule=Host(`rss.${DOMAIN}`)"
-      - "traefik.http.routers.rss.entrypoints=websecure"
-      - "traefik.http.services.rss.loadbalancer.server.port=80"
-      - "uptime.enable=true"
-      - "uptime.address=https://rss.${DOMAIN}"
-      - "glance.category=Media"
-    <<: [*common, *restart-log, *traefik-data, *postgres]
-    profiles: [prod]
+    <<: [ *common, *restart-log, *data ]
+    profiles: [ prod ]
 
   sane:
     image: sbs20/scanservjs:latest
     container_name: sane
+    volumes:
+      - ./sane:/etc/scanservjs
+      - /mnt/sata/sane:/var/lib/scanservjs/output
     environment:
       - SANED_NET_HOSTS=host.docker.internal
     extra_hosts:
       - "host.docker.internal:host-gateway"
-    volumes:
-      - ./sane:/etc/scanservjs
-      - /mnt/sata/sane:/var/lib/scanservjs/output
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.sane.rule=Host(`scan.${DOMAIN}`)"
@@ -972,30 +981,10 @@ services:
       - "uptime.enable=true"
       - "uptime.address=https://scan.${DOMAIN}"
       - "glance.category=Productivity"
-    <<: [*common, *restart-log, *traefik]
-    profiles: [prod]
+    <<: [ *common, *restart-log, *traefik ]
+    profiles: [ prod ]
 
-  degoog:
-    image: ghcr.io/degoog-org/degoog:latest
-    container_name: degoog
-    volumes:
-      - ./degoog:/app/data
-    environment:
-      DEGOOG_PUBLIC_INSTANCE: "false"
-      DEGOOG_VALKEY_URL: ${REDIS_URL}/5
-      DEGOOG_DANGEROUSLY_NO_PASSWORD: true
-    labels:
-      - "traefik.enable=true"
-      - "traefik.http.routers.degoog.rule=Host(`degoog.${DOMAIN}`)"
-      - "traefik.http.routers.degoog.entrypoints=websecure"
-      - "traefik.http.services.degoog.loadbalancer.server.port=4444"
-      - "uptime.enable=true"
-      - "uptime.address=https://degoog.${DOMAIN}"
-      - "glance.category=Productivity"
-    <<: [*common, *restart-log, *traefik-data, *postgres]
-    profiles: [prod]
-
-  seerr: # can use postgres
+  seerr:
     image: ghcr.io/seerr-team/seerr:latest
     container_name: seerr
     volumes:
@@ -1013,9 +1002,9 @@ services:
       - "traefik.http.services.seerr.loadbalancer.server.port=5055"
       - "uptime.enable=true"
       - "uptime.address=https://seerr.${DOMAIN}"
-    <<: [*common, *restart-log, *traefik]
+    <<: [ *common, *restart-log, *traefik ]
     init: true
-    profiles: [prod]
+    profiles: [ prod ]
 
   semaphore:
     build:
@@ -1037,8 +1026,8 @@ services:
       - "uptime.enable=true"
       - "uptime.address=https://semaphore.${DOMAIN}"
       - "glance.category=DevOps"
-    <<: [*restart-log, *traefik-data, *postgres]
-    profiles: [prod]
+    <<: [ *restart-log, *traefik-data, *postgres ]
+    profiles: [ prod ]
 
   sendspin:
     image: ghcr.io/trudenboy/sendspin-bt-bridge:latest
@@ -1059,11 +1048,11 @@ services:
       - "uptime.enable=true"
       - "uptime.address=https://sendspin.${DOMAIN}"
       - "glance.category=IOT"
-    <<: [*common, *restart-log, *privileged-host]
+    <<: [ *common, *restart-log, *privileged-host ]
     cap_add:
       - NET_ADMIN
       - NET_RAW
-    profiles: [prod]
+    profiles: [ prod ]
     security_opt:
       - apparmor:unconfined
       - seccomp:unconfined
@@ -1071,12 +1060,12 @@ services:
   snapotter:
     image: snapotter/snapotter:latest
     container_name: snapotter
+    volumes:
+      - ./snapotter:/data
     environment:
       DATABASE_URL: ${PG_URL}/snapotter
       REDIS_URL: ${REDIS_URL}/4
       AUTH_ENABLED: false
-    volumes:
-      - ./snapotter:/data
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.convert.rule=Host(`convert.${DOMAIN}`)"
@@ -1084,8 +1073,8 @@ services:
       - "traefik.http.services.convert.loadbalancer.server.port=1349"
       - "uptime.enable=true"
       - "uptime.address=https://convert.${DOMAIN}"
-    <<: [*restart-log, *traefik-data, *postgres]
-    profiles: [prod]
+    <<: [ *restart-log, *traefik-data, *postgres ]
+    profiles: [ prod ]
 
   syncthing:
     image: lscr.io/linuxserver/syncthing:latest
@@ -1094,9 +1083,9 @@ services:
       - ./syncthing:/config
       - /mnt/sata/Media:/config/Media
     ports:
-      - "${HOST_IP}:21027:21027/udp"
-      - "${HOST_IP}:22000:22000/tcp"
-      - "${HOST_IP}:22000:22000/udp"
+      - '${HOST_IP}:21027:21027/udp'
+      - '${HOST_IP}:22000:22000/tcp'
+      - '${HOST_IP}:22000:22000/udp'
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.server.rule=Host(`server.${DOMAIN}`)"
@@ -1105,9 +1094,9 @@ services:
       - "uptime.enable=true"
       - "uptime.address=https://server.${DOMAIN}"
       - "glance.category=DevOps"
-    <<: [*common, *restart-log, *traefik]
+    <<: [ *common, *restart-log, *traefik ]
     hostname: ${HOST_NAME}
-    profiles: [prod]
+    profiles: [ prod ]
 
   traefik:
     image: "traefik:v3.7"
@@ -1121,8 +1110,8 @@ services:
       PORKBUN_API_KEY: ${PORKBUN_API_KEY}
       PORKBUN_SECRET_API_KEY: ${PORKBUN_SECRET_API_KEY}
     ports:
-      - "${HOST_IP}:443:443/tcp"
-      - "${HOST_IP}:8080:80/tcp"
+      - '${HOST_IP}:443:443/tcp'
+      - '${HOST_IP}:8080:80/tcp'
     networks:
       traefik:
         ipv4_address: 172.31.2.2
@@ -1137,8 +1126,8 @@ services:
       - "uptime.enable=true"
       - "uptime.address=https://traefik.${DOMAIN}"
       - "glance.category=DevOps"
-    <<: [*common, *restart-log]
-    profiles: [prod]
+    <<: [ *common, *restart-log ]
+    profiles: [ prod ]
 
   ultrafeeder:
     image: ghcr.io/sdr-enthusiasts/docker-adsb-ultrafeeder:telegraf
@@ -1159,7 +1148,8 @@ services:
       READSB_ALT: ${FEEDER_ALT_M}m
       READSB_RX_LOCATION_ACCURACY: 2
       READSB_STATS_RANGE: true
-      ULTRAFEEDER_CONFIG: adsb,feed.adsb.fi,30004,beast_reduce_plus_out,uuid=${MULTIFEEDER_UUID}; mlat,feed.adsb.fi,31090,39000,uuid=${MULTIFEEDER_UUID}; mlathub,localhost,30104,beast_in;
+      ULTRAFEEDER_CONFIG: >
+        adsb,feed.adsb.fi,30004,beast_reduce_plus_out,uuid=${MULTIFEEDER_UUID}; mlat,feed.adsb.fi,31090,39000,uuid=${MULTIFEEDER_UUID}; mlathub,localhost,30104,beast_in;
       UUID: ${MULTIFEEDER_UUID}
       MLAT_USER: ${FEEDER_NAME}
       READSB_FORWARD_MLAT_SBS: true
@@ -1188,11 +1178,11 @@ services:
       - "uptime.enable=true"
       - "uptime.address=https://adsb.${DOMAIN}"
       - "glance.category=Other"
-    <<: [*common, *restart-log, *traefik]
+    <<: [ *common, *restart-log, *traefik ]
     device_cgroup_rules:
       - "c 189:* rwm"
     hostname: ultrafeeder
-    profiles: [prod]
+    profiles: [ prod ]
     tmpfs:
       - /run:exec,size=256M
       - /tmp:size=128M
@@ -1210,7 +1200,7 @@ services:
       DATABASE_URL: ${PG_URL}/umap
       SECRET_KEY: ${UMAP_SECRET_KEY}
       SITE_URL: ${HOST_IP}:8004
-      UMAP_ALLOW_ANONYMOUS: False
+      UMAP_ALLOW_ANONYMOUS: false
       DEBUG: 1
       REALTIME_ENABLED: 1
       REDIS_URL: ${REDIS_URL}/2
@@ -1223,8 +1213,8 @@ services:
       - "uptime.enable=true"
       - "uptime.address=https://map.${DOMAIN}"
       - "glance.category=Productivity"
-    <<: [*restart-log, *traefik-data, *postgres]
-    profiles: [prod]
+    <<: [ *restart-log, *traefik-data, *postgres ]
+    profiles: [ prod ]
 
   victorialogs:
     image: victoriametrics/victoria-logs:latest
@@ -1233,20 +1223,20 @@ services:
       - ./victoria/logs:/victoria-logs-data
     labels:
       - "glance.category=DevOps"
-    <<: [*common, *restart-log, *traefik]
-    profiles: [prod]
+    <<: [ *common, *restart-log, *traefik ]
+    profiles: [ prod ]
 
   victoriametrics:
     image: victoriametrics/victoria-metrics:latest
     container_name: victoriametrics
-    command:
-      - "-maxLabelsPerTimeseries=80"
     volumes:
       - ./victoria/metrics:/victoria-metrics-data
+    command:
+      - "-maxLabelsPerTimeseries=80"
     labels:
       - "glance.category=DevOps"
-    <<: [*common, *restart-log, *traefik]
-    profiles: [prod]
+    <<: [ *common, *restart-log, *traefik ]
+    profiles: [ prod ]
 
   vikunja:
     image: vikunja/vikunja:latest
@@ -1264,32 +1254,32 @@ services:
       - "uptime.enable=true"
       - "uptime.address=https://todo.${DOMAIN}"
       - "glance.category=Productivity"
-    <<: [*restart-log, *traefik-data, *postgres]
-    profiles: [prod]
+    <<: [ *restart-log, *traefik-data, *postgres ]
+    profiles: [ prod ]
 
   wings:
     image: ghcr.io/pelican/wings:latest
     container_name: wings
     volumes:
-      - "/var/run/docker.sock:/var/run/docker.sock"
-      - "/var/lib/docker/containers/:/var/lib/docker/containers/"
-      - "/home/admin/wings/etc:/etc/pelican/"
-      - "/home/admin/wings/lib:/home/admin/wings/lib"
-      - "/home/admin/wings/log:/home/admin/wings/log"
-      - "/home/admin/wings/tmp:/home/admin/wings/tmp"
+      - /var/run/docker.sock:/var/run/docker.sock
+      - /var/lib/docker/containers/:/var/lib/docker/containers/
+      - /home/admin/wings/etc:/etc/pelican/
+      - /home/admin/wings/lib:/home/admin/wings/lib
+      - /home/admin/wings/log:/home/admin/wings/log
+      - /home/admin/wings/tmp:/home/admin/wings/tmp
     environment:
       WINGS_UID: 988
       WINGS_GID: 988
       WINGS_USERNAME: pelican
     ports:
-      - "${HOST_IP}:2022:2022/tcp"
-      - "${HOST_IP}:8083:8080/tcp"
+      - '${HOST_IP}:2022:2022/tcp'
+      - '${HOST_IP}:8083:8080/tcp'
     networks:
       - wings0
     labels:
       - "glance.category=Other"
-    <<: [*common, *restart-log]
-    profiles: [prod]
+    <<: [ *common, *restart-log ]
+    profiles: [ prod ]
     tty: true
 
   yamtrack:
@@ -1308,8 +1298,8 @@ services:
       - "uptime.enable=true"
       - "uptime.address=https://yam.${DOMAIN}"
       - "glance.category=Ethical Acquisition"
-    <<: [*common, *restart-log, *traefik-data, *postgres]
-    profiles: [prod]
+    <<: [ *common, *restart-log, *traefik-data, *postgres ]
+    profiles: [ prod ]
 
   z2m:
     image: ghcr.io/koenkk/zigbee2mqtt:latest
@@ -1320,17 +1310,17 @@ services:
     volumes:
       - ./z2m:/app/data
       - /run/udev:/run/udev:ro
-    user: "1000:1000"
     labels:
       - "uptime.enable=true"
       - "uptime.address=https://z2m.${DOMAIN}"
       - "glance.category=IOT"
-    <<: [*common, *restart-log, *privileged-host]
+    user: "1000:1000"
+    <<: [ *common, *restart-log, *privileged-host ]
     devices:
       - ${ZIGBEE}:/dev/ttyUSB0
     group_add:
       - dialout
-    profiles: [prod]
+    profiles: [ prod ]
 
 networks:
   gluetun:
