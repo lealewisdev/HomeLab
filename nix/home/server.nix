@@ -3,7 +3,16 @@
   home.username = "admin";
   home.homeDirectory = "/home/admin";
   home.stateVersion = "25.11";
-  home.packages = with pkgs; [ ];
+  home.packages = with pkgs; [
+    prek
+    nodejs_26
+    pnpm
+    dust
+    nixfmt
+    devenv
+    hadolint
+    trivy
+  ];
   home.sessionVariables = {
     EDITOR = "micro";
     VISUAL = "micro";
@@ -23,28 +32,42 @@
   programs.fish = {
     enable = true;
     interactiveShellInit = ''
-      set -g fish_greeting "hello"
+      set -g fish_greeting "hewwo"
     '';
     completions.uv = ''
       uv generate-shell-completion fish | source
     '';
+    plugins = [
+      {
+        name = "autopair";
+        src = pkgs.fishPlugins.autopair.src;
+      }
+    ];
   };
   programs.bat.enable = true;
   programs.fzf = {
     enable = true;
     enableFishIntegration = true;
   };
-  programs.btop.enable = true;
+  programs.eza.enable = true;
+  programs.ripgrep.enable = true;
+  programs.fd.enable = true;
   programs.micro.enable = true;
   programs.tmux.enable = true;
   programs.uv.enable = true;
+  programs.btop.enable = true;
+  programs.yazi = {
+    enable = true;
+    enableFishIntegration = true;
+    shellWrapperName = "y";
+  };
   stylix.targets = {
     bat.enable = true;
-    fzf.enable = true;
     btop.enable = true;
+    fish.enable = true;
+    fzf.enable = true;
     micro.enable = true;
     tmux.enable = true;
-    fish.enable = true;
     yazi.enable = true;
   };
   programs.atuin = {
@@ -69,7 +92,7 @@
     settings = {
       auto_sync = true;
       sync_frequency = "5m";
-      sync_address = "redacted";
+      sync_address = "https://atuin.piperlab.dev";
       search_mode = "fuzzy";
     };
   };

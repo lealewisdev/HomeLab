@@ -1,3 +1,4 @@
+---
 name: PR Checks
 on:
   pull_request:
@@ -6,14 +7,21 @@ on:
 permissions:
   contents: read
 
+env:
+  REGISTRY: ${{ vars.REGISTRY }}
+  IMAGE: ${{ vars.REGISTRY }}/${{ github.repository }}
+
 jobs:
   renovate-config:
     runs-on: docker
+    # yamllint disable-line rule:line-length
     container: renovate/renovate:44.52@sha256:778ff1b404d79ef7763f0c904ebb279a4138ffc1017181ad076b1648e37f6dbd
     timeout-minutes: 5
     steps:
       - name: Checkout
-        uses: https://github.com/actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        # v7.0.1
+        # yamllint disable-line rule:line-length
+        uses: https://github.com/actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
       - name: Validate Renovate config
         run: renovate-config-validator --strict
 
@@ -22,7 +30,9 @@ jobs:
     timeout-minutes: 10
     steps:
       - name: Checkout
-        uses: https://github.com/actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        # v7.0.1
+        # yamllint disable-line rule:line-length
+        uses: https://github.com/actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
 
       - name: Lint Dockerfiles
         run: |
@@ -31,7 +41,11 @@ jobs:
             echo "::group::$file"
             hadolint "$file" || STATUS=1
             echo "::endgroup::"
-          done < <(find . -type f \( -name 'Dockerfile' -o -name 'Dockerfile.*' \) -print0)
+          done < <(
+            find . -type f \
+              \( -name 'Dockerfile' -o -name 'Dockerfile.*' \) \
+              -print0
+          )
           exit $STATUS
 
   trufflehog:
@@ -39,7 +53,9 @@ jobs:
     timeout-minutes: 10
     steps:
       - name: Checkout
-        uses: https://github.com/actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        # v7.0.1
+        # yamllint disable-line rule:line-length
+        uses: https://github.com/actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
         with:
           fetch-depth: 0
 
@@ -62,7 +78,9 @@ jobs:
           - dockerfile-context: docker
     steps:
       - name: Checkout
-        uses: https://github.com/actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        # v7.0.1
+        # yamllint disable-line rule:line-length
+        uses: https://github.com/actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
         with:
           fetch-depth: 0
 
@@ -71,10 +89,97 @@ jobs:
           BASE_SHA: ${{ github.event.pull_request.base.sha }}
           CONTEXT: ${{ matrix.dockerfile-context }}
         run: |
-          DOCKERFILE_CHANGED=$(git diff --name-only "$BASE_SHA" HEAD -- "${CONTEXT}/Dockerfile")
-          VERSION_CHANGED=$(git diff --name-only "$BASE_SHA" HEAD -- "${CONTEXT}/VERSION")
+          DOCKERFILE_CHANGED=$(git diff --name-only "$BASE_SHA" HEAD -- \
+            "${CONTEXT}/Dockerfile")
+          VERSION_CHANGED=$(git diff --name-only "$BASE_SHA" HEAD -- \
+            "${CONTEXT}/VERSION")
           if [ -n "$DOCKERFILE_CHANGED" ] && [ -z "$VERSION_CHANGED" ]; then
-            echo "${CONTEXT}/Dockerfile changed but ${CONTEXT}/VERSION wasn't bumped." >&2
-            echo "Bump ${CONTEXT}/VERSION before merging." >&2
+            printf '%s\n' \
+              "Bump ${CONTEXT}/VERSION because ${CONTEXT}/Dockerfile changed." \
+              >&2
             exit 1
           fi
+
+  trivy-scan:
+    runs-on: docker
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - dockerfile-context: docker
+    steps:
+      - name: Checkout
+        # v7.0.1
+        # yamllint disable-line rule:line-length
+        uses: https://github.com/actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+
+      - name: Log In To Registry
+        env:
+          REGISTRY_USER: ${{ secrets.REGISTRY_USER }}
+          REGISTRY_TOKEN: ${{ secrets.REGISTRY_TOKEN }}
+        run: |
+          printf '%s' "$REGISTRY_TOKEN" | docker login "$REGISTRY" \
+            -u "$REGISTRY_USER" --password-stdin
+
+      - name: Log In To dhi.io
+        env:
+          DHI_USER: ${{ secrets.DHI_USER }}
+          DHI_TOKEN: ${{ secrets.DHI_TOKEN }}
+        run: |
+          printf '%s' "$DHI_TOKEN" | docker login dhi.io \
+            -u "$DHI_USER" --password-stdin
+
+      - name: Build Image
+        id: build
+        env:
+          CONTEXT: ${{ matrix.dockerfile-context }}
+          TAG_VAR: ${{ vars.DOCKER_RUNNER }}
+        run: |
+          docker buildx inspect forgejo-builder >/dev/null 2>&1 || \
+            docker buildx create --name forgejo-builder --use
+          TAG="pr-scan:$(printf '%s' "$CONTEXT" | tr '/' '-')"
+          docker buildx build \
+            --pull \
+            --platform linux/amd64 \
+            --cache-from "type=registry,ref=${IMAGE}:${TAG_VAR}-cache" \
+            -t "$TAG" \
+            --load \
+            "$CONTEXT"
+          echo "tag=$TAG" >> "$GITHUB_OUTPUT"
+
+      - name: Log Out Of dhi.io
+        if: always()
+        run: docker logout dhi.io
+
+      - name: Log Out Of Registry
+        if: always()
+        run: docker logout "$REGISTRY"
+
+      - name: Get Trivy DB Cache Key Date
+        id: trivy-date
+        run: echo "date=$(date -u +'%Y-%m-%d')" >> "$GITHUB_OUTPUT"
+
+      - name: Cache Trivy DB
+        # v1.6.0
+        # yamllint disable-line rule:line-length
+        uses: https://github.com/actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9
+        with:
+          path: ~/.cache/trivy
+          key: trivy-db-${{ runner.os }}-${{ steps.trivy-date.outputs.date }}
+          restore-keys: |
+            trivy-db-${{ runner.os }}-
+
+      - name: Scan Image
+        env:
+          TAG: ${{ steps.build.outputs.tag }}
+          CONTEXT: ${{ matrix.dockerfile-context }}
+        run: |
+          trivy image \
+            --cache-dir ~/.cache/trivy \
+            --scanners vuln \
+            --exit-code 1 \
+            --ignore-unfixed \
+            --severity CRITICAL,HIGH \
+            --ignorefile "${CONTEXT}/.trivyignore" \
+            "$TAG"

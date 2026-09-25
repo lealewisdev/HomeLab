@@ -4,25 +4,33 @@ on:
     - cron: "0 4 * * *"
       timezone: Europe/London
   workflow_dispatch:
+    inputs:
+      image-tag:
+        description: Image tag to scan (leave blank for the repository's default)
+        required: false
+        default: ''
+        type: string
 permissions:
   contents: read
+env:
+  REGISTRY: ${{ vars.REGISTRY }}
+  IMAGE_TAG: ${{ github.event.inputs.image-tag || vars.SCAN_TAG || 'latest' }}
+  IMAGE_REF: ${{ vars.REGISTRY }}/${{ github.repository }}:${{ github.event.inputs.image-tag || vars.SCAN_TAG || 'latest' }}
+  TRIVY_IGNORE_FILE: ${{ vars.TRIVY_IGNORE_FILE || '.trivyignore' }}
 jobs:
-  scan-images:
+  scan-image:
     runs-on: docker
     timeout-minutes: 15
-    strategy:
-      fail-fast: false
-      matrix:
-        include:
-          - dockerfile-context: docker
-            image-tag-var: ${{ vars.DOCKER_RUNNER }}
-    env:
-      REGISTRY: ${{ vars.REGISTRY }}
-      CONTEXT: ${{ matrix.dockerfile-context }}
-      IMAGE_REF: ${{ vars.REGISTRY }}/${{ github.repository }}:${{ matrix.image-tag-var }}-latest
     steps:
       - name: Checkout
         uses: https://github.com/actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Validate Image Tag
+        run: |
+          if ! [[ "$IMAGE_TAG" =~ ^[A-Za-z0-9_][A-Za-z0-9_.-]{0,127}$ ]]; then
+            echo "Invalid image tag: $IMAGE_TAG" >&2
+            exit 1
+          fi
 
       - name: Log In To Registry
         env:
@@ -54,7 +62,7 @@ jobs:
             --exit-code 1 \
             --ignore-unfixed \
             --severity CRITICAL,HIGH \
-            --ignorefile "${CONTEXT}/.trivyignore" \
+            --ignorefile "$TRIVY_IGNORE_FILE" \
             "$IMAGE_REF"
 
       - name: Log Out Of Registry
@@ -74,6 +82,7 @@ jobs:
           RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
         run: |
           set -eo pipefail
+          WORKFLOW="${WORKFLOW} (${IMAGE_TAG})"
           curl \
             --fail-with-body \
             --show-error \
@@ -81,7 +90,5 @@ jobs:
             -X POST \
             -H "Content-Type: application/json" \
             -H "X-Webhook-Token: ${N8N_WEBHOOK_TOKEN}" \
-            -d "{
-              \"repository\":\"${REPOSITORY}\",\"workflow\":\"${WORKFLOW}\",\"status\":\"${JOB_STATUS}\",\"run_url\":\"${RUN_URL}\",\"apprise_url\":\"${APPRISE_URL}\"
-            }" \
+            -d "{\"repository\":\"${REPOSITORY}\",\"workflow\":\"${WORKFLOW}\",\"status\":\"${JOB_STATUS}\",\"run_url\":\"${RUN_URL}\",\"apprise_url\":\"${APPRISE_URL}\"}" \
             "$N8N_WEBHOOK_URL"

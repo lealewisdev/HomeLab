@@ -228,7 +228,5 @@ jobs:
             -X POST \
             -H "Content-Type: application/json" \
             -H "X-Webhook-Token: ${N8N_WEBHOOK_TOKEN}" \
-            -d "{
-              \"repository\":\"${REPOSITORY}\",\"workflow\":\"${WORKFLOW}\",\"run_url\":\"${RUN_URL}\",\"status\":\"${JOB_STATUS}\",\"apprise_url\":\"${APPRISE_URL}\"
-            }" \
+            -d "{\"repository\":\"${REPOSITORY}\",\"workflow\":\"${WORKFLOW}\",\"run_url\":\"${RUN_URL}\",\"status\":\"${JOB_STATUS}\",\"apprise_url\":\"${APPRISE_URL}\"}" \
             "$N8N_WEBHOOK_URL"

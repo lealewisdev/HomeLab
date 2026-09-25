@@ -306,6 +306,8 @@ nixos: {
             label: ""
             grid-rows: 1
             grid-columns: 1
+            horizontal-gap: 0
+            vertical-gap: 0
             width: 20
             height: 50
             style: { fill: transparent; stroke-width: 0 }
@@ -338,6 +340,8 @@ nixos: {
             label: ""
             grid-rows: 1
             grid-columns: 1
+            horizontal-gap: 0
+            vertical-gap: 0
             width: 20
             height: 50
             style: { fill: transparent; stroke-width: 0 }
@@ -370,6 +374,8 @@ nixos: {
             label: ""
             grid-rows: 1
             grid-columns: 1
+            horizontal-gap: 0
+            vertical-gap: 0
             width: 20
             height: 50
             style: { fill: transparent; stroke-width: 0 }
@@ -405,6 +411,8 @@ nixos: {
             label: ""
             grid-rows: 1
             grid-columns: 1
+            horizontal-gap: 0
+            vertical-gap: 0
             width: 20
             height: 50
             style: { fill: transparent; stroke-width: 0 }
@@ -442,6 +450,8 @@ nixos: {
             label: ""
             grid-rows: 1
             grid-columns: 1
+            horizontal-gap: 0
+            vertical-gap: 0
             width: 20
             height: 50
             style: { fill: transparent; stroke-width: 0 }
@@ -469,6 +479,8 @@ nixos: {
             label: ""
             grid-rows: 1
             grid-columns: 1
+            horizontal-gap: 0
+            vertical-gap: 0
             width: 20
             height: 50
             style: { fill: transparent; stroke-width: 0 }
@@ -496,6 +508,8 @@ nixos: {
             label: ""
             grid-rows: 1
             grid-columns: 1
+            horizontal-gap: 0
+            vertical-gap: 0
             width: 20
             height: 50
             style: { fill: transparent; stroke-width: 0 }
@@ -528,6 +542,8 @@ nixos: {
             label: ""
             grid-rows: 1
             grid-columns: 1
+            horizontal-gap: 0
+            vertical-gap: 0
             width: 20
             height: 50
             style: { fill: transparent; stroke-width: 0 }
@@ -699,6 +715,8 @@ nixos: {
             label: ""
             grid-rows: 1
             grid-columns: 1
+            horizontal-gap: 0
+            vertical-gap: 0
             width: 20
             height: 50
             style: { fill: transparent; stroke-width: 0 }
@@ -876,20 +894,68 @@ nixos: {
         grid-columns: 2
         vertical-gap: 25
         horizontal-gap: 25
-        z2m: "koenkk/zigbee2mqtt" {
-          icon.near: center-left
-          label.near: center-center
-          icon: https://cdn.jsdelivr.net/gh/selfhst/icons@main/svg/zigbee2mqtt-light.svg
+        z2m: {
+          label: ""
+          grid-rows: 1
+          grid-columns: 2
+          horizontal-gap: 6
+          vertical-gap: 0
+          width: 350
+          height: 50
+          style: { fill: transparent; stroke-width: 0 }
+          main: "koenkk/zigbee2mqtt" {
+            icon.near: center-left
+            label.near: center-center
+            icon: https://cdn.jsdelivr.net/gh/selfhst/icons@main/svg/zigbee2mqtt-light.svg
+            width: 324
+            height: 50
+            style.stroke-width: 0
+          }
+          deps: {
+            label: ""
+            grid-rows: 1
+            grid-columns: 1
+            horizontal-gap: 0
+            vertical-gap: 0
+            width: 20
+            height: 50
+            style: { fill: transparent; stroke-width: 0 }
+            d1: { label: ""; width: 16; height: 16; style: { fill: ${frappe.yellow}; stroke-width: 0; border-radius: 999 } }
+          }
         }
         homeassistant: "home-assistant/home-assistant" {
           icon.near: center-left
           label.near: center-center
           icon: https://cdn.jsdelivr.net/gh/selfhst/icons@main/svg/home-assistant-light.svg
         }
-        matter: "matter-js/matterjs-server" {
-          icon.near: center-left
-          label.near: center-center
-          icon: https://cdn.jsdelivr.net/gh/selfhst/icons@main/svg/matter-light.svg
+        matter: {
+          label: ""
+          grid-rows: 1
+          grid-columns: 2
+          horizontal-gap: 6
+          vertical-gap: 0
+          width: 350
+          height: 50
+          style: { fill: transparent; stroke-width: 0 }
+          main: "matter-js/matterjs-server" {
+            icon.near: center-left
+            label.near: center-center
+            icon: https://cdn.jsdelivr.net/gh/selfhst/icons@main/svg/matter-light.svg
+            width: 324
+            height: 50
+            style.stroke-width: 0
+          }
+          deps: {
+            label: ""
+            grid-rows: 1
+            grid-columns: 1
+            horizontal-gap: 0
+            vertical-gap: 0
+            width: 20
+            height: 50
+            style: { fill: transparent; stroke-width: 0 }
+            d1: { label: ""; width: 16; height: 16; style: { fill: ${frappe.blue}; stroke-width: 0; border-radius: 999 } }
+          }
         }
         sane: "sbs20/scanservjs" {
           icon.near: center-left
@@ -1076,14 +1142,14 @@ nixos: {
       grid-columns: 5
       horizontal-gap: 25
       vertical-gap: 75
-      mosquitto: "eclipse-mosquitto" {
-        class: green
+      mosquito: "eclipse-mosquito" {
+        class: yellow
         icon.near: center-left
         label.near: center-center
         icon: https://cdn.jsdelivr.net/gh/selfhst/icons@main/svg/mosquitto-light.svg
       }
       otbr: "openthread/border-router" {
-        class: teal
+        class: blue
         icon.near: center-left
         label.near: center-center
         icon: https://cdn.jsdelivr.net/gh/selfhst/icons@main/svg/thread-light.svg
@@ -1110,7 +1176,7 @@ nixos: {
 legend: {
   label: "Datastore key"
   near: bottom-right
-  grid-rows: 3
+  grid-rows: 5
   grid-columns: 1
   vertical-gap: 8
   horizontal-gap: 0
@@ -1145,5 +1211,25 @@ legend: {
     style: { fill: transparent; stroke-width: 0 }
     dot: { label: ""; width: 16; height: 16; style: { fill: ${frappe.pink}; stroke-width: 0; border-radius: 999 } }
     text: { label: "Meilisearch"; style: { font-color: ${frappe._text}; font-size: 20 } }
+  }
+  row_mqtt: {
+    label: ""
+    grid-rows: 1
+    grid-columns: 2
+    horizontal-gap: 10
+    vertical-gap: 0
+    style: { fill: transparent; stroke-width: 0 }
+    dot: { label: ""; width: 16; height: 16; style: { fill: ${frappe.yellow}; stroke-width: 0; border-radius: 999 } }
+    text: { label: "Mosquito (MQTT)"; style: { font-color: ${frappe._text}; font-size: 20 } }
+  }
+  row_otbr: {
+    label: ""
+    grid-rows: 1
+    grid-columns: 2
+    horizontal-gap: 10
+    vertical-gap: 0
+    style: { fill: transparent; stroke-width: 0 }
+    dot: { label: ""; width: 16; height: 16; style: { fill: ${frappe.blue}; stroke-width: 0; border-radius: 999 } }
+    text: { label: "OTBR (Thread)"; style: { font-color: ${frappe._text}; font-size: 20 } }
   }
 }

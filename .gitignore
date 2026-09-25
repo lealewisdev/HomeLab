@@ -1,0 +1,18 @@
+# Python caches / compiled files
+__pycache__
+*.pyc
+*.pyo
+.pytest_cache
+.ruff_cache
+src/overheadadsb/__pychache__
+
+# Virtual environments
+.venv
+
+# Environment / local configuration
+.env
+.env.*
+!.env.example
+.last_good_tag
+last_good.tar
+.devenv

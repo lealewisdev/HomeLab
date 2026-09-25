@@ -13,6 +13,30 @@
           "bumpType": "patch"
         }
       ]
+    },
+    {
+      "description": "Automerge patch/minor apt package bumps (deb datasource)",
+      "matchDatasources": ["deb"],
+      "matchUpdateTypes": ["patch", "minor"],
+      "automerge": true
+    },
+    {
+      "description": "Automerge digest-only bumps for pinned tool images (Trivy, Cosign, TruffleHog, Hadolint, uv)",
+      "matchManagers": ["dockerfile"],
+      "matchUpdateTypes": ["digest"],
+      "automerge": true
+    },
+    {
+      "description": "Automerge SHA-pinned Forgejo Actions digest bumps",
+      "matchManagers": ["github-actions"],
+      "matchUpdateTypes": ["digest"],
+      "automerge": true
+    },
+    {
+      "description": "Never automerge major bumps or nodejs (needs explicit review)",
+      "matchUpdateTypes": ["major"],
+      "matchDepNames": ["nodejs"],
+      "automerge": false
     }
   ]
 }

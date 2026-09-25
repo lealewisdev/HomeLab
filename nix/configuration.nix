@@ -28,6 +28,7 @@
     forceImportRoot = false;
     extraPools = [ "storage" ];
   };
+  boot.loader.grub.device = "/dev/sda";
   boot.loader.systemd-boot.enable = true;
   boot.loader.efi.canTouchEfiVariables = true;
   boot.kernelPackages = pkgs.linuxPackages;
@@ -67,8 +68,8 @@
     install rtl2838 /bin/false
   '';
 
-  networking.hostName = "server";
-  networking.hostId = "xxxxxxxx";
+  networking.hostName = "Yuki";
+  networking.hostId = "da2d7801";
   networking.nftables.enable = true;
   networking.networkmanager.enable = true;
   networking.firewall.trustedInterfaces = [
@@ -77,20 +78,20 @@
   ];
   networking.enableIPv6 = true;
   networking.firewall.allowedTCPPorts = [
-    80    # Traefik
-    443   # Traefik
-    8123  # HA
-    6052  # ESPHome
-    7586  # OTBR
-    8095  # MA
-    8088  # Sendspin
-    8080  # Traefik
-    8081  # OTBR
-    1883  # Mosquitto
-    8085  # Z2M
-    5580  # Matter
+    80 # Traefik
+    443 # Traefik
+    8123 # HA
+    6052 # ESPHome
+    7586 # OTBR
+    8095 # MA
+    8088 # Sendspin
+    8080 # Traefik
+    8081 # OTBR
+    1883 # Mosquito
+    8085 # Z2M
+    5580 # Matter
     10300 # ONNX
-    6566  # SANED
+    6566 # SANED
     39080 # Forgejo Runner
     39081 # Forgejo Runner
   ];
@@ -100,7 +101,7 @@
   networking.firewall.allowedUDPPorts = [
     16262 # Zomboid
     16261 # Zomboid
-    5353  # mDNS
+    5353 # mDNS
   ];
   networking.firewall.enable = true;
   networking.firewall.allowPing = true;
@@ -128,13 +129,14 @@
   users.users.admin.homeMode = "700";
   users.users.admin.linger = true;
 
-  users.users.guest = {
+  users.users.immi = {
     isNormalUser = true;
-    home = "/home/guest";
+    home = "/home/immi";
     homeMode = "700";
     shell = pkgs.zsh;
     openssh.authorizedKeys.keys = [
-      "redacted"
+      "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAID6rkmXv+X5VCHptOFvugV5vb0bx4gbWRCFqDYDDC2Ec Bebo"
+      "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIP+40siS8v18dyCOiarFxMT1y3Nzii899X595OckUEqw Denken"
     ];
   };
 
@@ -160,7 +162,7 @@
       {
         name = "Canon_SELPHY";
         location = "Home";
-        deviceUri = "gutenprint53+usb://canon-cp1500/redacted";
+        deviceUri = "gutenprint53+usb://canon-cp1500/C225111301307902";
         model = "gutenprint.5.3://canon-cp1500/expert";
         ppdOptions = {
           PageSize = "Postcard";
@@ -176,14 +178,14 @@
     listenAddresses = [ "*:631" ];
     allowFrom = [
       "localhost"
-      "xx.xxx.x.x/xx"
+      "10.100.0.0/24"
     ];
     browsing = true;
     defaultShared = true;
   };
   services.saned.enable = true;
   services.saned.extraConfig = ''
-    xxx.xx.x.x/xx
+    172.31.2.0/24
     data_portrange = 10000 - 10100
   '';
   services.openssh = {
@@ -201,12 +203,12 @@
         "workgroup" = "WORKGROUP";
         "server string" = "smbnix";
         "netbios name" = "smbnix";
-        "hosts allow" = "xxx.xxx.x. xxx.x.x.x localhost";
+        "hosts allow" = "192.168.1. 127.0.0.1 localhost";
         "hosts deny" = "0.0.0.0/0";
       };
       "public" = {
-        "path" = "/home/admin/redacted";
-        "browseable" = "yes";
+        "path" = "/home/admin/miku";
+        "browsable" = "yes";
         "read only" = "no";
         "guest ok" = "no";
         "create mask" = "0644";
@@ -267,7 +269,6 @@
       };
     };
   };
-  services.zfs.autoScrub.enable = true;
 
   sops.defaultSopsFile = ./secrets/example.yaml;
   sops.age.sshKeyPaths = [ "/etc/ssh/ssh_host_ed25519_key" ];
@@ -325,7 +326,7 @@
       data-root = "/mnt/sata/docker";
       default-address-pools = [
         {
-          base = "xx.xxx.x.x/xx";
+          base = "10.100.0.0/16";
           size = 24;
         }
       ];

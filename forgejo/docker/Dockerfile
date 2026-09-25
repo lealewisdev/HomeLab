@@ -52,10 +52,14 @@ COPY --from=dhi.io/trufflehog:3@sha256:a4be6b49a65b680590f442b0ff41693804c6f5bce
 COPY --from=hadolint/hadolint:v2.15.1-debian@sha256:9a3944b7fddcb947d1ffd90829ac1a6e5c30479223358f249d8b96c7d0019e27 \
     /bin/hadolint /usr/local/bin/hadolint
 
+COPY --from=dhi.io/uv:0@sha256:ff4c5dfc67f9783dc3217deaf66b88a10c2f7fb92f1ea6358feeaf84ac67bbaf \
+    /usr/local/bin/uv /usr/local/bin/uvx /usr/local/bin/
+
 RUN docker --version \
     && docker buildx version \
     && trivy --version \
     && cosign version \
     && trufflehog --version \
     && hadolint --version \
-    && node --version
+    && node --version \
+    && uv --version

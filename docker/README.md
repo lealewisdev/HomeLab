@@ -1,14 +1,29 @@
 # Docker Compose Stack
 
-70+ self-hosted services defined in one [Docker Compose](https://github.com/docker/compose) project, plus three custom container images.
+70+ self-hosted services defined in one
+ [Docker Compose](https://github.com/docker/compose) project, plus three custom
+container images.
 
 ## Highlights
 
-- **Single source of truth.** YAML anchors factor out shared concerns (restart and logging, networks, health-gated dependencies, VPN membership, privileged host access), so most services are an image, volumes, labels and one merge line.
-- **Label-driven configuration.** [Traefik](https://github.com/traefik/traefik) discovers routes from Docker labels, with certificates issued through an ACME DNS-01 challenge against Porkbun. The same labels declare uptime probes and dashboard categories for [Glance](https://github.com/glanceapp/glance).
-- **Network segmentation.** A dedicated edge network, an `internal: true` data network with no route out, and host networking only for hardware-bound IoT services.
-- **Health-gated startup.** Apps wait for a healthy database, the scraper waits for the VPN, and Zigbee2MQTT and the Matter server wait for the MQTT broker and border router respectively.
-- **Shared data tier.** One custom [PostgreSQL](https://github.com/postgres/postgres) image serves 16 applications, and one [Valkey](https://github.com/valkey-io/valkey) instance is shared through separate logical databases.
+- **Single source of truth.** YAML anchors factor out shared concerns (restart
+  and logging, networks, health-gated dependencies, VPN membership, privileged
+  host access), reducing most service definitions to an image, volumes, labels
+  and one merge line.
+- **Label-driven configuration.** [Traefik](https://github.com/traefik/traefik)
+  discovers routes from Docker labels, with certificates issued through an ACME
+  DNS-01 challenge against Porkbun. The same labels declare uptime probes and
+  dashboard categories for [Glance](https://github.com/glanceapp/glance).
+- **Network segmentation.** A dedicated edge network, an `internal: true` data
+  network with no route out, and host networking only for hardware-bound IoT
+  services.
+- **Health-gated startup.** Apps wait for a healthy database, the scraper waits
+  for the VPN, and Zigbee2MQTT and the Matter server wait for the MQTT broker
+  and border router respectively.
+- **Shared data tier.** One custom
+  [PostgreSQL](https://github.com/postgres/postgres) image serves 16
+  applications, and one [Valkey](https://github.com/valkey-io/valkey) instance
+  is shared through separate logical databases.
 
 ## Layout
 
@@ -19,11 +34,14 @@
 | `custom-images/postgres.Dockerfile` | Shared PostgreSQL 18 with vector search and geospatial support. |
 | `custom-images/semaphore.Dockerfile` | [Semaphore UI](https://github.com/semaphoreui/semaphore) with the Ansible Docker collection added. |
 
-On the host, each Dockerfile sits in its own build context (`./byparr`, `./postgres`, `./semaphore`) next to `compose.yaml`, alongside environment files, configuration and data directories that are not included here.
+On the host, each Dockerfile sits in its own build context (`./byparr`,
+ `./postgres`, `./semaphore`) next to `compose.yaml`, alongside environment
+ files, configuration and data directories that are not included here.
 
 ## How it works
 
-<!-- d2 diagram to be added: LAN clients -> gluetun (WireGuard, publishes :8191) + byparr SSH container (shared namespace) -> external server running Byparr -->
+<!-- d2 diagram to be added: LAN clients -> gluetun (WireGuard, publishes :8191)
+ + byparr SSH container (shared namespace) -> external server running Byparr -->
 
 | Area | Approach |
 | --- | --- |
@@ -32,7 +50,7 @@ On the host, each Dockerfile sits in its own build context (`./byparr`, `./postg
 | Home automation | [Home Assistant](https://github.com/home-assistant/core), [Zigbee2MQTT](https://github.com/Koenkk/zigbee2mqtt), the [Matter server](https://github.com/matter-js/matterjs-server) and the [OpenThread Border Router](https://github.com/openthread/ot-br-posix) run with host networking through one privileged anchor. |
 | Scraping offload | Byparr's headless browser is CPU-heavy, so it runs on an external server. The local container shares [Gluetun](https://github.com/qdm12/gluetun)'s network namespace, so its SSH tunnel leaves through WireGuard, and Gluetun publishes the forwarded port on the LAN. |
 
-**Custom images**
+## Custom images
 
 | Image | Notable details |
 | --- | --- |
@@ -42,8 +60,17 @@ On the host, each Dockerfile sits in its own build context (`./byparr`, `./postg
 
 ## Design decisions
 
-- **Least privilege.** Privileged mode is limited to hardware-bound IoT services plus Alloy and cAdvisor. The Docker socket is read-only wherever it is used only for discovery or metrics, and read-write only for the [Forgejo runner](https://code.forgejo.org/forgejo/runner) and Pelican Wings, which launch containers. Published ports bind to a specific host address rather than every interface.
-- **Versioning.** Most application images track `:latest` and are pinned only when an upstream change breaks something. Custom images are pinned by digest from the start.
-- **LAN-only, single host.** Everything is reachable only from the local network except one game server.
+- **Least privilege.** Privileged mode is limited to hardware-bound IoT services
+  plus Alloy and cAdvisor. The Docker socket is read-only wherever it is used
+  only for discovery or metrics, and read-write only for the
+  [Forgejo runner](https://code.forgejo.org/forgejo/runner) and Pelican Wings,
+  which launch containers. Published ports bind to a specific host address
+  rather than every interface.
+- **Versioning.** Most application images track `:latest` and are pinned only
+  when an upstream change breaks something. Custom images are pinned by digest
+  from the start.
+- **LAN-only, single host.** Everything is reachable only from the local network
+  except one game server.
 
-**Stack:** Docker Compose · Traefik · PostgreSQL · Valkey · Grafana Alloy · VictoriaMetrics · Gluetun · Home Assistant
+**Stack:** Docker Compose · Traefik · PostgreSQL · Valkey · Grafana Alloy ·
+ VictoriaMetrics · Gluetun · Home Assistant

@@ -25,22 +25,33 @@
     };
   };
 
-  outputs = { self, nixpkgs, home-manager, darwin, stylix, disko, sops-nix, ... }@inputs: {
-    nixosConfigurations."server" = nixpkgs.lib.nixosSystem {
-      system = "x86_64-linux";
-      modules = [
-        ./configuration.nix
-        ./disko-configuration.nix
-        home-manager.nixosModules.home-manager
-        stylix.nixosModules.stylix
-        disko.nixosModules.disko
-        sops-nix.nixosModules.sops
-        {
-          home-manager.useGlobalPkgs = true;
-          home-manager.useUserPackages = true;
-          home-manager.users.admin = import ./home/server.nix;
-        }
-      ];
+  outputs =
+    {
+      self,
+      nixpkgs,
+      home-manager,
+      darwin,
+      stylix,
+      disko,
+      sops-nix,
+      ...
+    }@inputs:
+    {
+      nixosConfigurations."server" = nixpkgs.lib.nixosSystem {
+        system = "x86_64-linux";
+        modules = [
+          ./configuration.nix
+          ./disko-configuration.nix
+          home-manager.nixosModules.home-manager
+          stylix.nixosModules.stylix
+          disko.nixosModules.disko
+          sops-nix.nixosModules.sops
+          {
+            home-manager.useGlobalPkgs = true;
+            home-manager.useUserPackages = true;
+            home-manager.users.admin = import ./home/server.nix;
+          }
+        ];
+      };
     };
-  };
 }

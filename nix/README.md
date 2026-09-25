@@ -1,14 +1,24 @@
 # NixOS Server Configuration
 
-Flake-based, fully declarative configuration for the single host that runs the homelab's Docker Compose stack. It covers disk and ZFS layout, boot, firewall, hardware, Docker, secrets and the my shell environment.
+Flake-based, fully declarative configuration for the single host that runs the
+ homelab's Docker Compose stack. It covers disk and ZFS layout, boot, firewall,
+hardware, Docker, secrets and the my shell environment.
 
 ## Highlights
 
-- **Single-source flake.** One flake describes the whole host, and every input follows a single nixpkgs (`nixos-unstable`), so the system and all modules evaluate against one package set.
-- **Declarative storage.** [disko](https://github.com/nix-community/disko) defines the data disk and its [ZFS](https://github.com/openzfs/zfs) pool, and Docker cannot start before its datasets are mounted.
-- **Default-deny firewall.** An nftables allow-list where every entry is commented with the service it belongs to.
-- **Secrets scaffolding.** [sops-nix](https://github.com/Mic92/sops-nix) is wired to decrypt with an age key derived from the host's SSH key, ready for encrypted secrets.
-- **Headless hardware.** Bluetooth, audio, printing, scanning and a USB radio dongle are configured.
+- **Single-source flake.** One flake describes the whole host, and every input
+  follows a single nixpkgs (`nixos-unstable`), so the system and all modules
+  evaluate against one package set.
+- **Declarative storage.** [disko](https://github.com/nix-community/disko)
+  defines the data disk and its [ZFS](https://github.com/openzfs/zfs) pool, and
+  Docker cannot start before its datasets are mounted.
+- **Default-deny firewall.** An nftables allow-list where every entry is
+  commented with the service it belongs to.
+- **Secrets scaffolding.** [sops-nix](https://github.com/Mic92/sops-nix) is
+  wired to decrypt with an age key derived from the host's SSH key, ready for
+  encrypted secrets.
+- **Headless hardware.** Bluetooth, audio, printing, scanning and a USB radio
+  dongle are configured.
 
 ## Layout
 
@@ -19,11 +29,15 @@ Flake-based, fully declarative configuration for the single host that runs the h
 | `disko-configuration.nix` | Partitioning and ZFS pool layout for the data disk. |
 | `home/server.nix` | [Home Manager](https://github.com/nix-community/home-manager) configuration for my `admin` user. |
 
-`hardware-configuration.nix` (generated per machine, and the source of the root filesystem) and `secrets/` (encrypted) are referenced but not included. Inputs are nixpkgs, Home Manager, disko, sops-nix and [Stylix](https://github.com/nix-community/stylix).
+`hardware-configuration.nix` (generated per machine, and the source of the root
+ filesystem) and `secrets/` (encrypted) are referenced but not included. Inputs
+ are nixpkgs, Home Manager, disko, sops-nix and
+ [Stylix](https://github.com/nix-community/stylix).
 
 ## How it works
 
-<!-- d2 diagram: flake inputs -> "server" NixOS config -> configuration.nix / disko / Home Manager (home/server.nix) -->
+<!-- d2 diagram: flake inputs -> "server" NixOS config -> configuration.nix /
+ disko / Home Manager (home/server.nix) -->
 
 | Area | Approach |
 | --- | --- |
@@ -38,8 +52,16 @@ Flake-based, fully declarative configuration for the single host that runs the h
 
 ## Design decisions
 
-- **Reproducible overrides.** Anything patched or fetched from outside nixpkgs, such as the BlueZ patch, is pinned by hash.
-- **LAN-only.** Service ports are open on the host firewall but not exposed beyond the local network, except the Project Zomboid game ports.
-- **Ordered startup.** Docker's dependency on ZFS mounts means containers never start against an empty data root.
+- **Reproducible overrides.** Anything patched or fetched from outside nixpkgs,
+  such as the BlueZ patch, is pinned by hash.
+- **LAN-only.** Service ports are open on the host firewall but not exposed
+  beyond the local network, except the Project Zomboid game ports.
+- **Ordered startup.** Docker's dependency on ZFS mounts means containers never
+  start against an empty data root.
 
-**Stack:** NixOS · Nix flakes · ZFS · disko · Home Manager · sops-nix · nftables · PipeWire · BlueZ
+**Stack:** NixOS · Nix flakes · ZFS · disko · Home Manager · sops-nix · nftables
+ · PipeWire · BlueZ
+
+## TODO
+
+- Set up homemanager for non-NixOs machines
