@@ -152,8 +152,9 @@ prometheus.scrape "uptime" {
 // APP METRICS
 
 prometheus.scrape "overheadadsb" {
-  targets         = [{ "__address__" = "overheadadsb:8003", "instance" = constants.hostname }]
+  targets = [{ "__address__" = "overheadadsb:8003", "instance" = "overheadadsb" }]
   metrics_path    = "/metrics"
+  job_name        = "overheadadsb"
   forward_to      = [prometheus.remote_write.victoriametrics.receiver]
   scrape_interval = "60s"
 }
