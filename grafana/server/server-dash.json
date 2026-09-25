@@ -1938,7 +1938,7 @@
                       "kind": "DataQuery",
                       "spec": {
                         "editorMode": "code",
-                        "expr": "sum by (status) (rate(http_requests_total{job=~\".*overheadadsb.*\"}[$__rate_interval]))",
+                        "expr": "sum by (status) (rate(http_requests_total{job=\"overheadadsb\"}[$__rate_interval]))",
                         "legendFormat": "{{status}}",
                         "range": true
                       },
@@ -2098,7 +2098,7 @@
                       "kind": "DataQuery",
                       "spec": {
                         "editorMode": "code",
-                        "expr": "histogram_quantile(0.95, sum by (le, handler) (rate(http_request_duration_seconds_bucket{job=~\".*overheadadsb.*\"}[$__rate_interval])))",
+                        "expr": "histogram_quantile(0.95, sum by (le, handler) (rate(http_request_duration_seconds_bucket{job=\"overheadadsb\"}[$__rate_interval])))",
                         "legendFormat": "{{handler}}",
                         "range": true
                       },
@@ -2213,7 +2213,7 @@
                       "kind": "DataQuery",
                       "spec": {
                         "editorMode": "code",
-                        "expr": "100 * (sum(rate(http_requests_total{job=~\".*overheadadsb.*\", status=~\"5..\"}[$__rate_interval])) or vector(0)) / sum(rate(http_requests_total{job=~\".*overheadadsb.*\"}[$__rate_interval]))",
+                        "expr": "100 * (sum(rate(http_requests_total{job=\"overheadadsb\", status=~\"5..\"}[$__rate_interval])) or vector(0)) / sum(rate(http_requests_total{job=\"overheadadsb\"}[$__rate_interval]))",
                         "instant": true,
                         "range": false
                       },
